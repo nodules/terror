@@ -1,0 +1,43 @@
+{
+  "name": "terror",
+  "version": "0.2.2",
+  "description": "Base error class which will help you grep logs more effectively",
+  "main": "./lib/terror.js",
+  "scripts": {
+    "test": "./node_modules/.bin/nodeunit ./test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/nodules/terror.git"
+  },
+  "keywords": [
+    "error"
+  ],
+  "author": {
+    "name": "Ruslan Kerimov",
+    "email": "orion@yandex-team.ru"
+  },
+  "contributors": [
+    {
+      "name": "Phillip Kovalev",
+      "email": "twilightfeel@gmail.com"
+    },
+    {
+      "name": "Dmitriy Vinokurov",
+      "email": "vinokuroff.dm@gmail.com"
+    },
+    {
+      "name": "Igor Shevchenko",
+      "email": "cyberskunk@yandex-team.ru"
+    }
+  ],
+  "license": "MIT",
+  "readmeFilename": "README.md",
+  "devDependencies": {
+    "nodeunit": "~0.8.0"
+  },
+  "dependencies": {
+    "objex": "0.2.4",
+    "extend": "1.1.3"
+  }
+}
