@@ -1,10 +1,10 @@
 {
   "name": "terror",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Base error class which will help you grep logs more effectively",
   "main": "./lib/terror.js",
   "scripts": {
-    "test": "./node_modules/.bin/nodeunit ./test"
+    "test": "./node_modules/.bin/jshint --config ./.jshintrc ./lib && ./node_modules/.bin/nodeunit ./test"
   },
   "repository": {
     "type": "git",
@@ -13,31 +13,27 @@
   "keywords": [
     "error"
   ],
-  "author": {
-    "name": "Ruslan Kerimov",
-    "email": "orion@yandex-team.ru"
-  },
+  "author": "Ruslan Kerimov <orion@yandex-team.ru> (https://github.com/ruslankerimov)",
+  "maintainers": [
+    "Phillip Kovalev <twilightfeel@gmail.com> (https://github.com/kaero)"
+  ],
   "contributors": [
+    "Phillip Kovalev <twilightfeel@gmail.com> (https://github.com/kaero)",
+    "Dmitriy Vinokurov <vinokuroff.dm@gmail.com> (https://github.com/vindm)",
+    "Igor Shevchenko <cyberskunk@yandex-team.ru> (https://github.com/cy6erskunk)"
+  ],
+  "licenses": [
     {
-      "name": "Phillip Kovalev",
-      "email": "twilightfeel@gmail.com"
-    },
-    {
-      "name": "Dmitriy Vinokurov",
-      "email": "vinokuroff.dm@gmail.com"
-    },
-    {
-      "name": "Igor Shevchenko",
-      "email": "cyberskunk@yandex-team.ru"
+      "type": "MIT",
+      "url": "http://github.com/nodules/terror/raw/master/LICENSE"
     }
   ],
-  "license": "MIT",
   "readmeFilename": "README.md",
-  "devDependencies": {
-    "nodeunit": "~0.8.0"
-  },
   "dependencies": {
-    "objex": "0.2.4",
-    "extend": "1.1.3"
+    "objex": "0.2.4"
+  },
+  "devDependencies": {
+    "nodeunit": "0.8.x",
+    "jshint": "2.1.x"
   }
 }
