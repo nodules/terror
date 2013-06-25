@@ -1,4 +1,4 @@
-# Terror
+# Terror [![Build Status](https://secure.travis-ci.org/nodules/terror.png)](http://travis-ci.org/nodules/terror)
 
 Base error class which will help you organize errors, generate informative logs and as result grep logs more effectively.
 
