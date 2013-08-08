@@ -83,7 +83,7 @@ var AppError = Terror.create('AppError')
 AppError.createError(AppError.CODES.BROKEN_CONFIG);
 ```
 
-Previous example produces following `CODES` and `MESSAGES` structures:
+Previous example produces following `CODES`, `MESSAGES` and `CODE_NAMES` structures:
 ```javascript
 AppError.CODES = {
 		UNKNOWN_ERROR : 101,
@@ -95,6 +95,12 @@ AppError.MESSAGES = {
     101 : 'Unknow error',
     2001 : 'Looks like configuration file is broken.',
     2002 : 'Can not connect to database %db_host%'
+}
+
+AppError.CODE_NAMES = {
+    101 : 'UNKNOWN_ERROR',
+    2001 : 'BROKEN_CONFIG',
+    2002 : 'DB_CONNECTION_FAILED'
 }
 ```
 
@@ -204,6 +210,7 @@ MyError.extendCodes({
 
 // it's fine
 MyError.CODES.UNKNOWN_ERROR = 2001;
+MyError.CODE_NAMES['2001'] = 'UNKNOWN_ERROR';
 MyError.MESSAGES['2001'] = 'Unbelievable!';
 ```
 
@@ -212,6 +219,7 @@ Also you can simply reset inherited codes:
 // @see http://npm.im/extend
 MyError.CODES = extend({}, Terror.CODES);
 MyError.MESSAGES = extend({}, Terror.MESSAGES);
+MyError.CODE_NAMES = extend({}, Terror.CODE_NAMES);
 ```
 
 ### DEFAULT_LOG_LEVEL
