@@ -1,6 +1,6 @@
 {
   "name": "terror",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "description": "Base error class which will help you grep logs more effectively",
   "main": "./lib/terror.js",
   "scripts": {
@@ -20,7 +20,8 @@
   "contributors": [
     "Phillip Kovalev <twilightfeel@gmail.com> (https://github.com/kaero)",
     "Dmitriy Vinokurov <vinokuroff.dm@gmail.com> (https://github.com/vindm)",
-    "Igor Shevchenko <cyberskunk@yandex-team.ru> (https://github.com/cy6erskunk)"
+    "Igor Shevchenko <cyberskunk@yandex-team.ru> (https://github.com/cy6erskunk)",
+    "Nikita Ezhkov (https://github.com/nikita-ezhkov)"
   ],
   "licenses": [
     {
