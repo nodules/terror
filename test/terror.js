@@ -50,14 +50,23 @@ module.exports = {
             TestErrorWithCodes = Terror.create('TestErrorWithCodes', testCodes),
             errorMessage = 'Test Error message',
             userName = 'john_doe',
+            errorCode = 'USER_ERROR',
             originalError = new Error(errorMessage),
             terrorByError = TestError.createError(null, originalError),
             terrorWithData = TestError.createError(TestError.CODES.USER_ERROR, { username : userName }),
             terrorWithMessage = TestError.createError(TestError.CODES.USER_ERROR, errorMessage),
-            terrorWithZeroErrorCode = TestError.createError(TestError.CODES.ABSOLUTE_ERROR);
+            terrorWithZeroErrorCode = TestError.createError(TestError.CODES.ABSOLUTE_ERROR),
+            terrorWithKnownCode = TestError.createError(TestError.CODES[errorCode]),
+            terrorWithUnknownCode = TestError.createError(errorCode);
 
         test.strictEqual(terrorByError.code, TestError.CODES.UNKNOWN_ERROR, 'use default code, if no one passed to createError');
+        test.strictEqual(terrorByError.codeName, 'UNKNOWN_ERROR', 'use default code name, if no one code passed to createError');
         test.strictEqual(terrorByError.originalError, originalError, 'Error instance passed to createError');
+
+        test.strictEqual(terrorWithKnownCode.codeName, errorCode, 'error with extended code has not codeName');
+
+        test.strictEqual(terrorWithUnknownCode.codeName, errorCode, 'error with custom code has wrong codeName');
+        test.strictEqual(terrorWithUnknownCode.code, terrorWithUnknownCode.codeName, 'error with custom code has different code and codeName');
 
         test.strictEqual(terrorWithZeroErrorCode.code, TestError.CODES.ABSOLUTE_ERROR, 'error with zero code doesn\'t use default code');
 
@@ -65,6 +74,7 @@ module.exports = {
         test.strictEqual(terrorWithMessage.originalError, errorMessage, 'custom message passed to createError');
 
         test.notStrictEqual(TestError.CODES, TestError.__super.CODES, 'static field CODE deep copied');
+        test.notStrictEqual(TestError.CODE_NAMES, TestError.__super.CODE_NAMES, 'static field CODE_NAMES deep copied');
         test.notStrictEqual(TestError.MESSAGES, TestError.__super.MESSAGES, 'static field MESSAGES deep copied');
 
         Object.getOwnPropertyNames(TestError.__super.CODES).forEach(function(codeName) {
@@ -74,6 +84,10 @@ module.exports = {
                 TestError.CODES[codeName],
                 TestError.__super.CODES[codeName],
                 ['error code "', codeName, '" inheritance from ', TestError.__super.prototype.name].join(''));
+            test.strictEqual(
+                TestError.CODE_NAMES[code],
+                TestError.__super.CODE_NAMES[code],
+                ['error code name"', codeName, '" inheritance from ', TestError.__super.prototype.name].join(''));
             test.strictEqual(
                 TestError.MESSAGES[code],
                 TestError.__super.MESSAGES[code],
@@ -88,6 +102,10 @@ module.exports = {
                     toTest.CODES[codeName],
                     testCodes[codeName][0],
                     ['Terror inheritor "',toTest.prototype.name,'" has it\'s own error code "', codeName, '"'].join(''));
+                test.strictEqual(
+                    toTest.CODE_NAMES[code],
+                    codeName,
+                    ['Terror inheritor "',toTest.prototype.name,'" has it\'s own error code name "', codeName, '"'].join(''));
                 test.strictEqual(
                     toTest.MESSAGES[code],
                     testCodes[codeName][1],
