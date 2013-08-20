@@ -134,13 +134,6 @@ module.exports = {
             terrorByError = TestError.createError(null, originalError),
             terrorWithData = TestError.createError(TestError.CODES.USER_ERROR, { username : userName, time : time }),
             terrorWithMessage = TestError.createError(TestError.CODES.USER_ERROR, errorMessage),
-            logger = function(message, level) {
-                log = [];
-
-                this.logMultilineError(message, level, function(msgRow) {
-                    log.push(msgRow);
-                });
-            },
             date,
             dateLogged;
 
