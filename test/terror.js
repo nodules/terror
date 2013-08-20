@@ -201,14 +201,18 @@ module.exports = {
     },
 
     "bind" : function(test) {
-        var testCodes = { USER_ERROR : [201, 'User "%username%" leads to error at %time%'] },
+        var testCodes = {
+                USER_ERROR : [201, 'User "%username%" leads to error at %time%'],
+                TO_STRING_TEST : [202, '%toString%']
+            },
             TestError = Terror.create('TestError').extendCodes(testCodes),
             userName = 'john_doe',
             time = '12:04',
             terrorNotBinded = TestError.createError(TestError.CODES.USER_ERROR),
             terrorBinded = TestError
                 .createError(TestError.CODES.USER_ERROR)
-                .bind({ username : userName, time : time });
+                .bind({ username : userName, time : time }),
+            terrorProto = TestError.createError(TestError.CODES.TO_STRING_TEST);
 
         catchConsoleLog();
         terrorNotBinded.log();
@@ -227,6 +231,27 @@ module.exports = {
             log[0].split(' ').slice(5).join(' '),
             TestError.MESSAGES[TestError.CODES.USER_ERROR].replace('%username%', userName).replace('%time%', time),
             'bind placeholders replacement done');
+
+        terrorProto.bind({});
+        catchConsoleLog();
+        terrorProto.log();
+        restoreConsoleLog();
+
+        test.strictEqual(
+            log[0].split(' ').slice(5).join(' '),
+            TestError.MESSAGES[TestError.CODES.TO_STRING_TEST],
+            'placeholder still here');
+
+        terrorProto._isLogged = false;
+        terrorProto.bind({ toString : userName });
+        catchConsoleLog();
+        terrorProto.log();
+        restoreConsoleLog();
+
+        test.strictEqual(
+            log[0].split(' ').slice(5).join(' '),
+            userName,
+            'placeholder still here');
 
         test.done();
     },
