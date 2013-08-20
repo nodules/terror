@@ -39,6 +39,8 @@ module.exports = {
         test.strictEqual(terrorDefaultCode.code, TestError.CODES.UNKNOWN_ERROR, 'use default code, if no one passed to createError');
         test.strictEqual(terrorViaCtor.message, errorMessage, 'message passed to constructor as string');
 
+        test.strictEqual(typeof testError.stack, 'string', 'call stack available via `stack` property');
+
         test.done();
     },
 
