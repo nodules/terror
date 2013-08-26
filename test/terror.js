@@ -298,5 +298,45 @@ module.exports = {
         }
 
         test.done();
+    },
+
+    "default logger" : function(test) {
+        var TestError = Terror.create('TestError'),
+            terrorByError = TestError.createError("01", "Error1");
+
+        catchConsoleLog();
+        terrorByError.log();
+        restoreConsoleLog();
+
+        test.ok(log.length === 1, 'one log');
+        test.done();
+    },
+
+    "remove default logger" : function(test) {
+        var TestError = Terror.create('TestError').removeDefaultLogger(),
+            terrorByError = TestError.createError("01", "Error1");
+
+        catchConsoleLog();
+        terrorByError.log();
+        restoreConsoleLog();
+
+        test.ok(log.length === 0, 'empty log');
+        test.done();
+    },
+
+    "using custom logger" : function(test) {
+        var customLogger = function (message, level) {
+            console.log(message, level);
+            console.log(message, level);
+        };
+        var TestError = Terror.create('TestError').removeDefaultLogger().addLogger(customLogger),
+            terrorByError = TestError.createError("01", "Error1");
+
+        catchConsoleLog();
+        terrorByError.log();
+        restoreConsoleLog();
+
+        test.ok(log.length === 2, 'double log');
+        test.done();
     }
 };

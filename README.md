@@ -106,9 +106,9 @@ AppError.CODE_NAMES = {
 
 Where error `101` inherited from the `Terror`.
 
-### setLogger(logger)
+### addLogger(logger)
 
-Set function which error class and its iheritors will use for logging.
+Add function which error class and its iheritors will use for logging.
 It called by `log` method with two argumetns: `message` and `level`.
 
 Example:
@@ -117,7 +117,22 @@ var log = [],
     logger = function(message, level) {
         log.push([new Date(), level, message].join());
     },
-    MyError = Terror.create('MyError').setLogger(logger);
+    MyError = Terror.create('MyError').addLogger(logger);
+
+MyError.createError().log();
+
+console.log(log.join('\n'));
+```
+
+### removeDefaultLogger(logger)
+
+Example:
+```javascript
+var log = [],
+    logger = function(message, level) {
+        log.push([new Date(), level, message].join());
+    },
+    MyError = Terror.create('MyError').removeDefaultLogger().addLogger(logger);
 
 MyError.createError().log();
 
