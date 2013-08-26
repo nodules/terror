@@ -326,8 +326,8 @@ module.exports = {
 
     "using custom logger" : function(test) {
         var customLogger = function (message, level) {
-            console.log(message);
-            console.log(message);
+            console.log(message, level);
+            console.log(message, level);
         };
         var TestError = Terror.create('TestError').removeDefaultLogger().addLogger(customLogger),
             terrorByError = TestError.createError("01", "Error1");
