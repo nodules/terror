@@ -6,6 +6,7 @@ Base error class which will help you organize errors, generate informative logs 
 
 ```javascript
 var Terror = require('terror'),
+
     // declare error type with custom error codes and messages
     MyError = Terror.create('MyError', {
         STRANGE_THING_HAPPENS: [ 2001, 'Something strange happens' ]
@@ -86,9 +87,9 @@ AppError.createError(AppError.CODES.BROKEN_CONFIG);
 Previous example produces following `CODES`, `MESSAGES` and `CODE_NAMES` structures:
 ```javascript
 AppError.CODES = {
-        UNKNOWN_ERROR: 101,
-        BROKEN_CONFIG: 2001,
-        DB_CONNECTION_FAILED: 2002
+    UNKNOWN_ERROR: 101,
+    BROKEN_CONFIG: 2001,
+    DB_CONNECTION_FAILED: 2002
 }
 
 AppError.MESSAGES = {
