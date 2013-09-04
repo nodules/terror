@@ -9,7 +9,7 @@ var Terror = require('terror'),
 
     // declare error type with custom error codes and messages
     MyError = Terror.create('MyError', {
-        STRANGE_THING_HAPPENS : [ 2001, 'Something strange happens' ]
+        STRANGE_THING_HAPPENS: [ 2001, 'Something strange happens' ]
     });
 
 try {
@@ -29,7 +29,7 @@ try {
 }
 ```
 
-## Constructor 
+## Constructor
 
 ```javascript
 new Terror(code, message);
@@ -38,9 +38,9 @@ new Terror();
 new Terror(null, message);
 ```
 
-Also can be called as the function, then calls self as the constructor internally and returns created instance.
+Also can be called as a function, then calls self as the constructor internally and returns created instance.
 
-Both argumetns are not required:
+Both arguments are not required:
  * if only `code` passed, message will got from `Terror.MESSAGES` hash by the `code` value as the key;
  * if `code` is absent, will be used default value `Terror.CODES.UNKNOWN_ERROR`.
 
@@ -51,9 +51,9 @@ Both argumetns are not required:
 Returns constructor inherited from Terror or it's inheritor. You must specify `name` for logging purpose.
 
 Arguments:
- * `{String} name` – error name for logging;
- * `{Function} constructor` – optional, don't forget to call `<YouErrorClass>.__super.apply(this, arguments)`.
- * `{Object} codes` - optional, CODES hash { CODE_NAME: [ 2001, 'error message' ], … }
+ * `{String} name` – Error Class name for logging;
+ * `{Function} [constructor]` – don't forget to call `<YouErrorClass>.__super.apply(this, arguments)`.
+ * `{Object} [codes]` - CODES hash { CODE_NAME: [ 2001, 'error message' ], … }
 
 Example:
 ```javascript
@@ -62,22 +62,23 @@ var AppError = Terror.create('AppError'),
         ControllerError.__super.apply(this, Array.prototype.slice.call(arguments, 1));
         this.controller = controller;
     }, {
-        IO_ERROR : [2001, 'Broken IO'],
-        FS_ERROR : [2002, 'Broken %fsName% file-system']
+        IO_ERROR: [ 2001, 'Broken IO' ],
+        FS_ERROR: [ 2002, 'Broken %fsName% file-system' ]
     });
 ```
 
 ### extendCodes(codes)
 
-Extends `CODES` and associated `MESSAGES` hashes using `codes` declaration. Method throws an error if codes uniqueness violated by extention.
+Extends `CODES` and associated `MESSAGES` hashes using `codes` declaration. Method throws an error if codes uniqueness violated by extension.
 
 Example:
 ```javascript
-var AppError = Terror.create('AppError')
-				.extendCodes({
-						BROKEN_CONFIG : [2001, 'Looks like configuration file is broken.'],
-						DB_CONNECTION_FAILED : [2002, 'Can not connect to database %db_host%']
-				});
+var AppError = Terror
+        .create('AppError')
+        .extendCodes({
+                BROKEN_CONFIG: [ 2001, 'Looks like configuration file is broken.' ],
+                DB_CONNECTION_FAILED: [ 2002, 'Can not connect to database %db_host%' ]
+        });
 
 // now you can use AppError.CODES.BROKEN_CONFIG & AppError.CODES.DB_CONNECTION_FAILED to produce errors
 AppError.createError(AppError.CODES.BROKEN_CONFIG);
@@ -86,21 +87,21 @@ AppError.createError(AppError.CODES.BROKEN_CONFIG);
 Previous example produces following `CODES`, `MESSAGES` and `CODE_NAMES` structures:
 ```javascript
 AppError.CODES = {
-		UNKNOWN_ERROR : 101,
-        BROKEN_CONFIG : 2001,
-		DB_CONNECTION_FAILED : 2002
+    UNKNOWN_ERROR: 101,
+    BROKEN_CONFIG: 2001,
+    DB_CONNECTION_FAILED: 2002
 }
 
 AppError.MESSAGES = {
-    101 : 'Unknow error',
-    2001 : 'Looks like configuration file is broken.',
-    2002 : 'Can not connect to database %db_host%'
+    101: 'Unknown error',
+    2001: 'Looks like configuration file is broken.',
+    2002: 'Can not connect to database %db_host%'
 }
 
 AppError.CODE_NAMES = {
-    101 : 'UNKNOWN_ERROR',
-    2001 : 'BROKEN_CONFIG',
-    2002 : 'DB_CONNECTION_FAILED'
+    101: 'UNKNOWN_ERROR',
+    2001: 'BROKEN_CONFIG',
+    2002: 'DB_CONNECTION_FAILED'
 }
 ```
 
@@ -108,14 +109,14 @@ Where error `101` inherited from the `Terror`.
 
 ### setLogger(logger)
 
-Set function which error class and its iheritors will use for logging.
-It called by `log` method with two argumetns: `message` and `level`.
+Set function which error class and its inheritors will use for logging.
+It called by `log` method with two arguments: `message` and `level`.
 
 Example:
 ```javascript
 var log = [],
     logger = function(message, level) {
-        log.push([new Date(), level, message].join());
+        log.push([ new Date(), level, message ].join());
     },
     MyError = Terror.create('MyError').setLogger(logger);
 
@@ -138,9 +139,9 @@ Arguments:
 Example:
 ```javascript
 var MyError = Terror.create('MyError', {
-    IO_ERROR : [2001, 'Broken IO'],
-    FS_ERROR : [2002, 'Broken %fsName% file-system']
-});
+        IO_ERROR: [ 2001, 'Broken IO' ],
+        FS_ERROR: [ 2002, 'Broken %fsName% file-system' ]
+    });
 
 // valid createError calls
 
@@ -160,7 +161,7 @@ MyError.createError(MyError.CODES.IO_ERROR);
 MyError.createError(MyError.CODES.IO_ERROR, new Error('kbd int broken'));
 
 // "2002 MyError: Broken vfat file-system"
-MyError.createError(MyError.CODES.FS_ERROR, {fsName : 'vfat'});
+MyError.createError(MyError.CODES.FS_ERROR, { fsName: 'vfat' });
 
 // fails, because Terror.MESSAGES[2001] is undefined
 Terror.createError(MyError.CODES.IO_ERROR);
@@ -169,15 +170,15 @@ Terror.createError(MyError.CODES.IO_ERROR);
 ### ensureError(originalError, code)
 
 Returns `originalError` if it's an instance of `Terror`.
-Else wrap `originalError` into new `Terror` instance using `code` or `UNKNOWN_ERROR` code if second argument is absent.
+Otherwise wrap `originalError` into new `Terror` instance using `code` or `UNKNOWN_ERROR` code if second argument is absent.
 
 Example:
 ```javascript
 var MyError = Terror.create('MyError', {
-        EMPTY_MESSAGE : [1000, 'Message string is empty'],
-        UNEXPECTED_ERROR : [1999, 'Unexpected error']
+        EMPTY_MESSAGE: [ 1000, 'Message string is empty' ],
+        UNEXPECTED_ERROR: [ 1999, 'Unexpected error' ]
     }),
-    arr = [ { msg : "hello" }, { msg : "" }, {} ];
+    arr = [ { msg: "hello" }, { msg: "" }, {} ];
 
 arr.forEach(function(item) {
     try {
@@ -205,7 +206,7 @@ var MyError = Terror.create('MyError');
 
 // following call leads to error, because UNKNOWN_ERROR name already exist – it's inherited from Terror
 MyError.extendCodes({
-    UNKNOWN_ERROR : [2001, 'Unbelievable!']
+    UNKNOWN_ERROR: [ 2001, 'Unbelievable!' ]
 });
 
 // it's fine
@@ -235,22 +236,22 @@ It equals `"ERROR"` by default.
 Log error with specified `level`. If method called twice or more for the same instance, logger will be called by first `log` call only.
 
 Arguments:
-* `{*} level` – optional argument, any type accepted by logger; default value equals `constructor.DEFAULT_LOG_LEVEL`.
+* `{*} [level=constructor.DEFAULT_LOG_LEVEL]` – any type accepted by logger.
 
 Example:
 ```javascript
 var Terror = require('terror'),
-		terr;
+    terr;
 
 Terror.DEFAULT_LOG_LEVEL = 'INFO';
 
 try {
-		console.lag("hello!");
+    console.lag("hello!");
 } catch (err) {
-		terr = Terror.ensureError(err);
-		terr.log()
-				.log('warn')
-				.log('error');
+    terr = Terror.ensureError(err);
+    terr.log()
+        .log('warn')
+        .log('error');
 }
 ```
 
@@ -258,7 +259,7 @@ try {
 
 ### bind(data)
 
- Fill an error message with values from `data` object properties.
+Fill an error message with values from `data` object properties.
 
 Arguments:
 * `{Object} data` – hash, where key is a placeholder name to be replaced, value – a data to replace with.
@@ -266,20 +267,20 @@ Arguments:
 Example:
 ```javascript
 var IOError = Terror.create('MyError', {
-        IO_ERROR : [2001, 'Broken IO pipe "%pipe%"']
+        IO_ERROR: [ 2001, 'Broken IO pipe "%pipe%"' ]
     });
 
 IOError.createError(IOError.CODES.IO_ERROR)
-		.bind({ pipe : 'main bus' })
-		.log('PANIC');
+    .bind({ pipe: 'main bus' })
+    .log('PANIC');
 // or
-IOError.createError(IOError.CODES.IO_ERROR, { pipe : 'main bus' })
-		.log('PANIC');
+IOError.createError(IOError.CODES.IO_ERROR, { pipe: 'main bus' })
+    .log('PANIC');
 ```
 
-## Internal, but usefull prototype methods
+## Internal, but useful prototype methods
 
-Following methods used by built-in logger routine, but may be usefull for any simple text logger.
+Following methods used by built-in logger routine, but may be useful for any simple text logger.
 
 ### logMultilineError(message, level, logger)
 
