@@ -1,6 +1,6 @@
 {
   "name": "terror",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "Base error class which will help you grep logs more effectively",
   "main": "./lib/terror.js",
   "scripts": {
@@ -31,7 +31,7 @@
   ],
   "readmeFilename": "README.md",
   "dependencies": {
-    "objex": "0.2.4"
+    "objex": "0.2.5"
   },
   "devDependencies": {
     "nodeunit": "0.8.x",
