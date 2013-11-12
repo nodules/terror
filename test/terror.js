@@ -253,6 +253,9 @@ module.exports = {
             userName,
             'placeholder still here');
 
+        test.strictEqual(terrorBinded.data.username, userName,
+            'binded data available via `data` property');
+
         test.done();
     },
 
