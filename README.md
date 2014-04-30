@@ -22,8 +22,8 @@ try {
         // throw new MyError(MyError.CODES.STRANGE_THING_HAPPENS);
     }
 } catch (err) {
-    // ensureError method returns err if it is an instance of Terror,
-    // otherwise wrap Error instance in the Terror with default code UNKNOWN_ERROR
+    // ensureError method returns err if it is an instance of MyError,
+    // otherwise wrap Error instance in the MyError with default code UNKNOWN_ERROR
     MyError.ensureError(err)
         .log();
 }
@@ -169,8 +169,8 @@ Terror.createError(MyError.CODES.IO_ERROR);
 
 ### ensureError(originalError, code)
 
-Returns `originalError` if it's an instance of `Terror`.
-Otherwise wrap `originalError` into new `Terror` instance using `code` or `UNKNOWN_ERROR` code if second argument is absent.
+Returns `originalError` if it's an instance of the owning class.
+Otherwise wrap `originalError` into new owning class instance using `code` or `UNKNOWN_ERROR` code if second argument is absent.
 
 Example:
 ```javascript
@@ -189,7 +189,7 @@ arr.forEach(function(item) {
         }
     } catch (err) {
         throw MyError.ensureError(err, MyError.CODES.UNEXPECTED_ERROR)
-            .log();
+            .log(); // logging like MyError instance
     }
 })
 ```

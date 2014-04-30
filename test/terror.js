@@ -262,6 +262,8 @@ module.exports = {
     "ensureError" : function(test) {
         var rawError = new Error('test error'),
             terror = new Terror(null, 'test error'),
+            ChildError = Terror.create('ChildError', {}),
+            childError = new ChildError(null, 'test child terror error'),
             ensuredError,
             code = 42,
             zeroCode = 0,
@@ -298,6 +300,40 @@ module.exports = {
             ensuredError = Terror.ensureError(err);
 
             test.strictEqual(ensuredError, terror, 'original Terror instance is the same object as of ensured error');
+        }
+
+        ensuredError = undefined;
+
+        try {
+            throw rawError;
+        } catch (err) {
+            ensuredError = ChildError.ensureError(err);
+
+            test.ok(ensuredError instanceof Terror, 'ensured as ChildError error is an instance of the Terror');
+            test.ok(ensuredError instanceof ChildError, 'ensured as ChildError error is an instance of the ChildError');
+        }
+
+        ensuredError = undefined;
+
+        try {
+            throw terror;
+        } catch (err) {
+            ensuredError = ChildError.ensureError(err);
+
+            test.notEqual(err, ensuredError, 'ensured as ChildError error is not the same as error of Terror');
+            test.strictEqual(ensuredError.originalError, err, 'ensured as ChildError error refers to the original error of Terror');
+            test.ok(ensuredError instanceof Terror, 'ensured as ChildError error is an instance of the Terror');
+            test.ok(ensuredError instanceof ChildError, 'ensured as ChildError error is an instance of the ChildError');
+        }
+
+        ensuredError = undefined;
+
+        try {
+            throw childError;
+        } catch (err) {
+            ensuredError = ChildError.ensureError(err);
+
+            test.strictEqual(err, ensuredError, 'original ChildError instance is the same object as of ensured error');
         }
 
         test.done();
