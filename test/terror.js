@@ -45,30 +45,22 @@ module.exports = {
     },
 
     "createError & extendCodes" : function(test) {
-        var testCodes = { USER_ERROR : [201, 'User "%username%" leads to error'],
-                ABSOLUTE_ERROR : [0, 'Our World Is Broken...']
+        var testCodes = {
+                USER_ERROR : 'User "%username%" leads to error',
+                ABSOLUTE_ERROR : 'Our World Is Broken...'
             },
             TestError = Terror.create('TestError').extendCodes(testCodes),
             TestErrorWithCodes = Terror.create('TestErrorWithCodes', testCodes),
             errorMessage = 'Test Error message',
             userName = 'john_doe',
-            errorCode = 'USER_ERROR',
             originalError = new Error(errorMessage),
             terrorByError = TestError.createError(null, originalError),
             terrorWithData = TestError.createError(TestError.CODES.USER_ERROR, { username : userName }),
             terrorWithMessage = TestError.createError(TestError.CODES.USER_ERROR, errorMessage),
-            terrorWithZeroErrorCode = TestError.createError(TestError.CODES.ABSOLUTE_ERROR),
-            terrorWithKnownCode = TestError.createError(TestError.CODES[errorCode]),
-            terrorWithUnknownCode = TestError.createError(errorCode);
+            terrorWithZeroErrorCode = TestError.createError(TestError.CODES.ABSOLUTE_ERROR);
 
         test.strictEqual(terrorByError.code, TestError.CODES.UNKNOWN_ERROR, 'use default code, if no one passed to createError');
-        test.strictEqual(terrorByError.codeName, 'UNKNOWN_ERROR', 'use default code name, if no one code passed to createError');
         test.strictEqual(terrorByError.originalError, originalError, 'Error instance passed to createError');
-
-        test.strictEqual(terrorWithKnownCode.codeName, errorCode, 'error with extended code has not codeName');
-
-        test.strictEqual(terrorWithUnknownCode.codeName, errorCode, 'error with custom code has wrong codeName');
-        test.strictEqual(terrorWithUnknownCode.code, terrorWithUnknownCode.codeName, 'error with custom code has different code and codeName');
 
         test.strictEqual(terrorWithZeroErrorCode.code, TestError.CODES.ABSOLUTE_ERROR, 'error with zero code doesn\'t use default code');
 
@@ -76,42 +68,25 @@ module.exports = {
         test.strictEqual(terrorWithMessage.originalError, errorMessage, 'custom message passed to createError');
 
         test.notStrictEqual(TestError.CODES, TestError.__super.CODES, 'static field CODE deep copied');
-        test.notStrictEqual(TestError.CODE_NAMES, TestError.__super.CODE_NAMES, 'static field CODE_NAMES deep copied');
         test.notStrictEqual(TestError.MESSAGES, TestError.__super.MESSAGES, 'static field MESSAGES deep copied');
 
-        Object.getOwnPropertyNames(TestError.__super.CODES).forEach(function(codeName) {
-            var code = TestError.CODES[codeName];
-
+        Object.getOwnPropertyNames(TestError.__super.CODES).forEach(function(code) {
             test.strictEqual(
-                TestError.CODES[codeName],
-                TestError.__super.CODES[codeName],
-                ['error code "', codeName, '" inheritance from ', TestError.__super.prototype.name].join(''));
-            test.strictEqual(
-                TestError.CODE_NAMES[code],
-                TestError.__super.CODE_NAMES[code],
-                ['error code name"', codeName, '" inheritance from ', TestError.__super.prototype.name].join(''));
+                TestError.CODES[code],
+                TestError.__super.CODES[code],
+                ['error code "', code, '" inheritance from ', TestError.__super.prototype.name].join(''));
             test.strictEqual(
                 TestError.MESSAGES[code],
                 TestError.__super.MESSAGES[code],
-                ['error message "', codeName, '" : ', code, ' inheritance from ', TestError.__super.prototype.name].join(''));
+                ['error message "', code, '" : ', code, ' inheritance from ', TestError.__super.prototype.name].join(''));
         });
 
-        Object.getOwnPropertyNames(testCodes).forEach(function(codeName) {
-            var code = TestError.CODES[codeName];
-
+        Object.getOwnPropertyNames(testCodes).forEach(function(code) {
             [TestError, TestErrorWithCodes].forEach(function(toTest) {
                 test.strictEqual(
-                    toTest.CODES[codeName],
-                    testCodes[codeName][0],
-                    ['Terror inheritor "',toTest.prototype.name,'" has it\'s own error code "', codeName, '"'].join(''));
-                test.strictEqual(
-                    toTest.CODE_NAMES[code],
-                    codeName,
-                    ['Terror inheritor "',toTest.prototype.name,'" has it\'s own error code name "', codeName, '"'].join(''));
-                test.strictEqual(
                     toTest.MESSAGES[code],
-                    testCodes[codeName][1],
-                    ['Terror inheritor "',toTest.prototype.name,'" has it\'s own error message "', codeName, '" : ', code].join(''));
+                    testCodes[code],
+                    ['Terror inheritor "',toTest.prototype.name,'" has it\'s own error message "', code, '" : ', code].join(''));
             });
 
         });
@@ -126,7 +101,7 @@ module.exports = {
 
     "logError, setLogger, logger and error formatting" : function(test) {
         var errorClassName = 'TestError',
-            testCodes = { USER_ERROR : [201, 'User "%username%" leads to error at %time%'] },
+            testCodes = { USER_ERROR : 'User "%username%" leads to error at %time%' },
             TestError = Terror.create(errorClassName).extendCodes(testCodes),
             errorMessage = 'Test Error message',
             userName = 'john_doe',
@@ -202,8 +177,8 @@ module.exports = {
 
     "bind" : function(test) {
         var testCodes = {
-                USER_ERROR : [201, 'User "%username%" leads to error at %time%'],
-                TO_STRING_TEST : [202, '%toString%']
+                USER_ERROR : 'User "%username%" leads to error at %time%',
+                TO_STRING_TEST : '%toString%'
             },
             TestError = Terror.create('TestError').extendCodes(testCodes),
             userName = 'john_doe',
