@@ -67,18 +67,18 @@ module.exports = {
         test.strictEqual(terrorWithMessage.code, TestError.CODES.USER_ERROR, 'error code passed to createError with custom message');
         test.strictEqual(terrorWithMessage.originalError, errorMessage, 'custom message passed to createError');
 
-        test.notStrictEqual(TestError.CODES, TestError.__super.CODES, 'static field CODE deep copied');
-        test.notStrictEqual(TestError.MESSAGES, TestError.__super.MESSAGES, 'static field MESSAGES deep copied');
+        test.notStrictEqual(TestError.CODES, Terror.CODES, 'static field CODE deep copied');
+        test.notStrictEqual(TestError.MESSAGES, Terror.MESSAGES, 'static field MESSAGES deep copied');
 
-        Object.getOwnPropertyNames(TestError.__super.CODES).forEach(function(code) {
+        Object.getOwnPropertyNames(Terror.CODES).forEach(function(code) {
             test.strictEqual(
                 TestError.CODES[code],
-                TestError.__super.CODES[code],
-                ['error code "', code, '" inheritance from ', TestError.__super.prototype.name].join(''));
+                Terror.CODES[code],
+                ['error code "', code, '" inheritance from ', Terror.prototype.name].join(''));
             test.strictEqual(
                 TestError.MESSAGES[code],
-                TestError.__super.MESSAGES[code],
-                ['error message "', code, '" : ', code, ' inheritance from ', TestError.__super.prototype.name].join(''));
+                Terror.MESSAGES[code],
+                ['error message "', code, '" : ', code, ' inheritance from ', Terror.prototype.name].join(''));
         });
 
         Object.getOwnPropertyNames(testCodes).forEach(function(code) {
@@ -118,6 +118,7 @@ module.exports = {
         terrorByError.log();
         restoreConsoleLog();
 
+        console.log(log);
         test.ok(log.length > 1, 'multiline log');
 
         test.strictEqual(log[0].split(' ')[2], TestError.DEFAULT_ERROR_LEVEL, 'default error level');
@@ -194,7 +195,7 @@ module.exports = {
         restoreConsoleLog();
 
         test.strictEqual(
-            log[0].split(' ').slice(5).join(' '),
+            log[0].split(' ').slice(4).join(' '),
             TestError.MESSAGES[TestError.CODES.USER_ERROR],
             'not binded error message contains placeholder');
 
@@ -203,7 +204,7 @@ module.exports = {
         restoreConsoleLog();
 
         test.strictEqual(
-            log[0].split(' ').slice(5).join(' '),
+            log[0].split(' ').slice(4).join(' '),
             TestError.MESSAGES[TestError.CODES.USER_ERROR].replace('%username%', userName).replace('%time%', time),
             'bind placeholders replacement done');
 
@@ -213,7 +214,7 @@ module.exports = {
         restoreConsoleLog();
 
         test.strictEqual(
-            log[0].split(' ').slice(5).join(' '),
+            log[0].split(' ').slice(4).join(' '),
             TestError.MESSAGES[TestError.CODES.TO_STRING_TEST],
             'placeholder still here');
 
@@ -224,7 +225,7 @@ module.exports = {
         restoreConsoleLog();
 
         test.strictEqual(
-            log[0].split(' ').slice(5).join(' '),
+            log[0].split(' ').slice(4).join(' '),
             userName,
             'placeholder still here');
 
@@ -240,8 +241,8 @@ module.exports = {
             ChildError = Terror.create('ChildError', {}),
             childError = new ChildError(null, 'test child terror error'),
             ensuredError,
-            code = 42,
-            zeroCode = 0,
+            code = 'TEST_CODE',
+            zeroCode = '',
             ensuredErrorWithCode,
             ensuredErrorWithZeroCode;
 

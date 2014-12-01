@@ -30,9 +30,6 @@
     }
   ],
   "readmeFilename": "README.md",
-  "dependencies": {
-    "objex": "0.2.5"
-  },
   "devDependencies": {
     "nodeunit": "0.8.x",
     "jshint": "2.1.x",
