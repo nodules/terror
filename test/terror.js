@@ -1,4 +1,5 @@
-var Terror = require('../lib/terror'),
+var test = require('chai').assert,
+    Terror = require('../lib/terror');
     originalConsoleLog = console.log,
     log = [];
 
@@ -15,7 +16,7 @@ function catchConsoleLog() {
 }
 
 module.exports = {
-    constructor : function(test) {
+    constructor : function() {
         var testErrorName = 'TestError',
             errorMessage = 'Test Error message',
             TestError = Terror.create(testErrorName),
@@ -40,11 +41,9 @@ module.exports = {
         test.strictEqual(terrorViaCtor.message, errorMessage, 'message passed to constructor as string');
 
         test.strictEqual(typeof testError.stack, 'string', 'call stack available via `stack` property');
-
-        test.done();
     },
 
-    "createError & extendCodes" : function(test) {
+    "createError & extendCodes" : function() {
         var testCodes = {
                 USER_ERROR : 'User "%username%" leads to error',
                 ABSOLUTE_ERROR : 'Our World Is Broken...'
@@ -96,10 +95,9 @@ module.exports = {
             TestError.MESSAGES[TestError.CODES.USER_ERROR].replace('%username%', userName),
             'message data bindings via createError');
 
-        test.done();
     },
 
-    "logError, setLogger, logger and error formatting" : function(test) {
+    "logError, setLogger, logger and error formatting" : function() {
         var errorClassName = 'TestError',
             testCodes = { USER_ERROR : 'User "%username%" leads to error at %time%' },
             TestError = Terror.create(errorClassName).extendCodes(testCodes),
@@ -118,28 +116,21 @@ module.exports = {
         terrorByError.log();
         restoreConsoleLog();
 
-        console.log(log);
         test.ok(log.length > 1, 'multiline log');
 
-        test.strictEqual(log[0].split(' ')[2], TestError.DEFAULT_ERROR_LEVEL, 'default error level');
+        test.strictEqual(log[0].split(' ')[0], TestError.DEFAULT_ERROR_LEVEL, 'default error level');
 
         test.strictEqual(
-            log[1].split(' ')[2],
+            log[1].split(' ')[0],
             TestError.DEFAULT_ERROR_LEVEL.replace(/./g, '>'),
             'error level replaced with ">"');
 
-        test.strictEqual(log[0].split(' ')[4].replace(/:$/g, ''), errorClassName, 'log error class name');
+        test.strictEqual(log[0].split(' ')[2].replace(/:$/g, ''), errorClassName, 'log error class name');
 
         test.strictEqual(
-            log[0].split(' ').slice(5).join(' ').replace(/^.*\(Error: (.*)\)$/g, "$1"),
+            log[0].split(' ').slice(3).join(' ').replace(/^.*\(Error: (.*)\)$/g, "$1"),
             errorMessage,
             'log original error message');
-
-        date = new Date();
-        dateLogged = new Date(log[log.length - 1].split(' ').slice(0, 2).join(' '));
-
-        // dirty aproximated to half-minute date and time comparison
-        test.ok(date.getTime() - dateLogged.getTime() < 30000, 'log timestamp');
 
         catchConsoleLog();
         terrorByError.log();
@@ -152,16 +143,16 @@ module.exports = {
         restoreConsoleLog();
 
         test.strictEqual(
-            log[0].split(' ').slice(5).join(' ').replace(/.*\((.*)\)$/g, "$1"),
+            log[0].split(' ').slice(3).join(' ').replace(/.*\((.*)\)$/g, "$1"),
             errorMessage,
             'append original error message');
         test.strictEqual(
-            log[0].split(' ')[2],
+            log[0].split(' ')[0],
             errorLevel.toUpperCase(),
             'custom error level passed to logError');
         test.strictEqual(
-            log[0].split(' ')[3],
-            String(TestError.CODES.USER_ERROR),
+            log[0].split(' ')[1],
+            TestError.CODES.USER_ERROR,
             'custom error code');
 
         catchConsoleLog();
@@ -169,14 +160,12 @@ module.exports = {
         restoreConsoleLog();
 
         test.strictEqual(
-            log[0].split(' ').slice(5).join(' '),
+            log[0].split(' ').slice(3).join(' '),
             TestError.MESSAGES[TestError.CODES.USER_ERROR].replace('%username%', userName).replace('%time%', time),
             'data binding via createError');
-
-        test.done();
     },
 
-    "bind" : function(test) {
+    "bind" : function() {
         var testCodes = {
                 USER_ERROR : 'User "%username%" leads to error at %time%',
                 TO_STRING_TEST : '%toString%'
@@ -195,7 +184,7 @@ module.exports = {
         restoreConsoleLog();
 
         test.strictEqual(
-            log[0].split(' ').slice(4).join(' '),
+            log[0].split(' ').slice(3).join(' '),
             TestError.MESSAGES[TestError.CODES.USER_ERROR],
             'not binded error message contains placeholder');
 
@@ -204,7 +193,7 @@ module.exports = {
         restoreConsoleLog();
 
         test.strictEqual(
-            log[0].split(' ').slice(4).join(' '),
+            log[0].split(' ').slice(3).join(' '),
             TestError.MESSAGES[TestError.CODES.USER_ERROR].replace('%username%', userName).replace('%time%', time),
             'bind placeholders replacement done');
 
@@ -214,7 +203,7 @@ module.exports = {
         restoreConsoleLog();
 
         test.strictEqual(
-            log[0].split(' ').slice(4).join(' '),
+            log[0].split(' ').slice(3).join(' '),
             TestError.MESSAGES[TestError.CODES.TO_STRING_TEST],
             'placeholder still here');
 
@@ -225,17 +214,15 @@ module.exports = {
         restoreConsoleLog();
 
         test.strictEqual(
-            log[0].split(' ').slice(4).join(' '),
+            log[0].split(' ').slice(3).join(' '),
             userName,
             'placeholder still here');
 
         test.strictEqual(terrorBinded.data.username, userName,
             'binded data available via `data` property');
-
-        test.done();
     },
 
-    "ensureError" : function(test) {
+    "ensureError" : function() {
         var rawError = new Error('test error'),
             terror = new Terror(null, 'test error'),
             ChildError = Terror.create('ChildError', {}),
@@ -311,7 +298,5 @@ module.exports = {
 
             test.strictEqual(err, ensuredError, 'original ChildError instance is the same object as of ensured error');
         }
-
-        test.done();
     }
 };
