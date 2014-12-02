@@ -1,5 +1,5 @@
 var test = require('chai').assert,
-    Terror = require('../lib/terror');
+    Terror = require('../lib/terror'),
     originalConsoleLog = console.log,
     log = [];
 
@@ -108,9 +108,7 @@ module.exports = {
             originalError = new Error(errorMessage),
             terrorByError = TestError.createError(null, originalError),
             terrorWithData = TestError.createError(TestError.CODES.USER_ERROR, { username : userName, time : time }),
-            terrorWithMessage = TestError.createError(TestError.CODES.USER_ERROR, errorMessage),
-            date,
-            dateLogged;
+            terrorWithMessage = TestError.createError(TestError.CODES.USER_ERROR, errorMessage);
 
         catchConsoleLog();
         terrorByError.log();
