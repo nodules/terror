@@ -10,8 +10,13 @@ function restoreConsoleLog() {
 function catchConsoleLog() {
     log = [];
 
-    console.log = function() {
-        log.push(Array.prototype.join.apply(arguments));
+    console.log = function(msg) {
+        var _msg = msg.split('\n'),
+            i = 0,
+            line;
+        while (/* jshint boss:true */line = _msg[i++]) {
+            log.push(line);
+        }
     };
 }
 
