@@ -4,7 +4,7 @@
   "description": "Base error class which will help you grep logs more effectively",
   "main": "./lib/terror.js",
   "scripts": {
-    "test": "./node_modules/.bin/jshint --config ./.jshintrc ./lib ./test && ./node_modules/.bin/jscs ./lib ./test && ./node_modules/.bin/nodeunit ./test"
+    "test": "./node_modules/.bin/jshint --config ./.jshintrc ./lib ./test && ./node_modules/.bin/jscs ./lib ./test && ./node_modules/.bin/mocha -u exports ./test"
   },
   "repository": {
     "type": "git",
@@ -30,12 +30,10 @@
     }
   ],
   "readmeFilename": "README.md",
-  "dependencies": {
-    "objex": "0.2.5"
-  },
   "devDependencies": {
-    "nodeunit": "0.8.x",
+    "chai": "^1.10.0",
+    "jscs": "1.0.x",
     "jshint": "2.1.x",
-    "jscs": "1.0.x"
+    "mocha": "^2.0.1"
   }
 }

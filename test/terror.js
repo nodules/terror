@@ -1,4 +1,5 @@
-var Terror = require('../lib/terror'),
+var test = require('chai').assert,
+    Terror = require('../lib/terror'),
     originalConsoleLog = console.log,
     log = [];
 
@@ -9,13 +10,18 @@ function restoreConsoleLog() {
 function catchConsoleLog() {
     log = [];
 
-    console.log = function() {
-        log.push(Array.prototype.join.apply(arguments));
+    console.log = function(msg) {
+        var _msg = msg.split('\n'),
+            i = 0,
+            line;
+        while (/* jshint boss:true */line = _msg[i++]) {
+            log.push(line);
+        }
     };
 }
 
 module.exports = {
-    constructor : function(test) {
+    constructor : function() {
         var testErrorName = 'TestError',
             errorMessage = 'Test Error message',
             TestError = Terror.create(testErrorName),
@@ -40,78 +46,51 @@ module.exports = {
         test.strictEqual(terrorViaCtor.message, errorMessage, 'message passed to constructor as string');
 
         test.strictEqual(typeof testError.stack, 'string', 'call stack available via `stack` property');
-
-        test.done();
     },
 
-    "createError & extendCodes" : function(test) {
-        var testCodes = { USER_ERROR : [201, 'User "%username%" leads to error'],
-                ABSOLUTE_ERROR : [0, 'Our World Is Broken...']
+    "createError & extendCodes" : function() {
+        var testCodes = {
+                USER_ERROR : 'User "%username%" leads to error',
+                ABSOLUTE_ERROR : 'Our World Is Broken...'
             },
             TestError = Terror.create('TestError').extendCodes(testCodes),
             TestErrorWithCodes = Terror.create('TestErrorWithCodes', testCodes),
             errorMessage = 'Test Error message',
             userName = 'john_doe',
-            errorCode = 'USER_ERROR',
             originalError = new Error(errorMessage),
             terrorByError = TestError.createError(null, originalError),
             terrorWithData = TestError.createError(TestError.CODES.USER_ERROR, { username : userName }),
             terrorWithMessage = TestError.createError(TestError.CODES.USER_ERROR, errorMessage),
-            terrorWithZeroErrorCode = TestError.createError(TestError.CODES.ABSOLUTE_ERROR),
-            terrorWithKnownCode = TestError.createError(TestError.CODES[errorCode]),
-            terrorWithUnknownCode = TestError.createError(errorCode);
+            terrorWithZeroErrorCode = TestError.createError(TestError.CODES.ABSOLUTE_ERROR);
 
         test.strictEqual(terrorByError.code, TestError.CODES.UNKNOWN_ERROR, 'use default code, if no one passed to createError');
-        test.strictEqual(terrorByError.codeName, 'UNKNOWN_ERROR', 'use default code name, if no one code passed to createError');
         test.strictEqual(terrorByError.originalError, originalError, 'Error instance passed to createError');
-
-        test.strictEqual(terrorWithKnownCode.codeName, errorCode, 'error with extended code has not codeName');
-
-        test.strictEqual(terrorWithUnknownCode.codeName, errorCode, 'error with custom code has wrong codeName');
-        test.strictEqual(terrorWithUnknownCode.code, terrorWithUnknownCode.codeName, 'error with custom code has different code and codeName');
 
         test.strictEqual(terrorWithZeroErrorCode.code, TestError.CODES.ABSOLUTE_ERROR, 'error with zero code doesn\'t use default code');
 
         test.strictEqual(terrorWithMessage.code, TestError.CODES.USER_ERROR, 'error code passed to createError with custom message');
         test.strictEqual(terrorWithMessage.originalError, errorMessage, 'custom message passed to createError');
 
-        test.notStrictEqual(TestError.CODES, TestError.__super.CODES, 'static field CODE deep copied');
-        test.notStrictEqual(TestError.CODE_NAMES, TestError.__super.CODE_NAMES, 'static field CODE_NAMES deep copied');
-        test.notStrictEqual(TestError.MESSAGES, TestError.__super.MESSAGES, 'static field MESSAGES deep copied');
+        test.notStrictEqual(TestError.CODES, Terror.CODES, 'static field CODE deep copied');
+        test.notStrictEqual(TestError.MESSAGES, Terror.MESSAGES, 'static field MESSAGES deep copied');
 
-        Object.getOwnPropertyNames(TestError.__super.CODES).forEach(function(codeName) {
-            var code = TestError.CODES[codeName];
-
+        Object.getOwnPropertyNames(Terror.CODES).forEach(function(code) {
             test.strictEqual(
-                TestError.CODES[codeName],
-                TestError.__super.CODES[codeName],
-                ['error code "', codeName, '" inheritance from ', TestError.__super.prototype.name].join(''));
-            test.strictEqual(
-                TestError.CODE_NAMES[code],
-                TestError.__super.CODE_NAMES[code],
-                ['error code name"', codeName, '" inheritance from ', TestError.__super.prototype.name].join(''));
+                TestError.CODES[code],
+                Terror.CODES[code],
+                ['error code "', code, '" inheritance from ', Terror.prototype.name].join(''));
             test.strictEqual(
                 TestError.MESSAGES[code],
-                TestError.__super.MESSAGES[code],
-                ['error message "', codeName, '" : ', code, ' inheritance from ', TestError.__super.prototype.name].join(''));
+                Terror.MESSAGES[code],
+                ['error message "', code, '" : ', code, ' inheritance from ', Terror.prototype.name].join(''));
         });
 
-        Object.getOwnPropertyNames(testCodes).forEach(function(codeName) {
-            var code = TestError.CODES[codeName];
-
+        Object.getOwnPropertyNames(testCodes).forEach(function(code) {
             [TestError, TestErrorWithCodes].forEach(function(toTest) {
                 test.strictEqual(
-                    toTest.CODES[codeName],
-                    testCodes[codeName][0],
-                    ['Terror inheritor "',toTest.prototype.name,'" has it\'s own error code "', codeName, '"'].join(''));
-                test.strictEqual(
-                    toTest.CODE_NAMES[code],
-                    codeName,
-                    ['Terror inheritor "',toTest.prototype.name,'" has it\'s own error code name "', codeName, '"'].join(''));
-                test.strictEqual(
                     toTest.MESSAGES[code],
-                    testCodes[codeName][1],
-                    ['Terror inheritor "',toTest.prototype.name,'" has it\'s own error message "', codeName, '" : ', code].join(''));
+                    testCodes[code],
+                    ['Terror inheritor "',toTest.prototype.name,'" has it\'s own error message "', code, '" : ', code].join(''));
             });
 
         });
@@ -121,12 +100,11 @@ module.exports = {
             TestError.MESSAGES[TestError.CODES.USER_ERROR].replace('%username%', userName),
             'message data bindings via createError');
 
-        test.done();
     },
 
-    "logError, setLogger, logger and error formatting" : function(test) {
+    "logError, setLogger, logger and error formatting" : function() {
         var errorClassName = 'TestError',
-            testCodes = { USER_ERROR : [201, 'User "%username%" leads to error at %time%'] },
+            testCodes = { USER_ERROR : 'User "%username%" leads to error at %time%' },
             TestError = Terror.create(errorClassName).extendCodes(testCodes),
             errorMessage = 'Test Error message',
             userName = 'john_doe',
@@ -135,9 +113,7 @@ module.exports = {
             originalError = new Error(errorMessage),
             terrorByError = TestError.createError(null, originalError),
             terrorWithData = TestError.createError(TestError.CODES.USER_ERROR, { username : userName, time : time }),
-            terrorWithMessage = TestError.createError(TestError.CODES.USER_ERROR, errorMessage),
-            date,
-            dateLogged;
+            terrorWithMessage = TestError.createError(TestError.CODES.USER_ERROR, errorMessage);
 
         catchConsoleLog();
         terrorByError.log();
@@ -145,25 +121,19 @@ module.exports = {
 
         test.ok(log.length > 1, 'multiline log');
 
-        test.strictEqual(log[0].split(' ')[2], TestError.DEFAULT_ERROR_LEVEL, 'default error level');
+        test.strictEqual(log[0].split(' ')[0], TestError.DEFAULT_ERROR_LEVEL, 'default error level');
 
         test.strictEqual(
-            log[1].split(' ')[2],
+            log[1].split(' ')[0],
             TestError.DEFAULT_ERROR_LEVEL.replace(/./g, '>'),
             'error level replaced with ">"');
 
-        test.strictEqual(log[0].split(' ')[4].replace(/:$/g, ''), errorClassName, 'log error class name');
+        test.strictEqual(log[0].split(' ')[2].replace(/:$/g, ''), errorClassName, 'log error class name');
 
         test.strictEqual(
-            log[0].split(' ').slice(5).join(' ').replace(/^.*\(Error: (.*)\)$/g, "$1"),
+            log[0].split(' ').slice(3).join(' ').replace(/^.*\(Error: (.*)\)$/g, "$1"),
             errorMessage,
             'log original error message');
-
-        date = new Date();
-        dateLogged = new Date(log[log.length - 1].split(' ').slice(0, 2).join(' '));
-
-        // dirty aproximated to half-minute date and time comparison
-        test.ok(date.getTime() - dateLogged.getTime() < 30000, 'log timestamp');
 
         catchConsoleLog();
         terrorByError.log();
@@ -176,16 +146,16 @@ module.exports = {
         restoreConsoleLog();
 
         test.strictEqual(
-            log[0].split(' ').slice(5).join(' ').replace(/.*\((.*)\)$/g, "$1"),
+            log[0].split(' ').slice(3).join(' ').replace(/.*\((.*)\)$/g, "$1"),
             errorMessage,
             'append original error message');
         test.strictEqual(
-            log[0].split(' ')[2],
+            log[0].split(' ')[0],
             errorLevel.toUpperCase(),
             'custom error level passed to logError');
         test.strictEqual(
-            log[0].split(' ')[3],
-            String(TestError.CODES.USER_ERROR),
+            log[0].split(' ')[1],
+            TestError.CODES.USER_ERROR,
             'custom error code');
 
         catchConsoleLog();
@@ -193,17 +163,15 @@ module.exports = {
         restoreConsoleLog();
 
         test.strictEqual(
-            log[0].split(' ').slice(5).join(' '),
+            log[0].split(' ').slice(3).join(' '),
             TestError.MESSAGES[TestError.CODES.USER_ERROR].replace('%username%', userName).replace('%time%', time),
             'data binding via createError');
-
-        test.done();
     },
 
-    "bind" : function(test) {
+    "bind" : function() {
         var testCodes = {
-                USER_ERROR : [201, 'User "%username%" leads to error at %time%'],
-                TO_STRING_TEST : [202, '%toString%']
+                USER_ERROR : 'User "%username%" leads to error at %time%',
+                TO_STRING_TEST : '%toString%'
             },
             TestError = Terror.create('TestError').extendCodes(testCodes),
             userName = 'john_doe',
@@ -219,7 +187,7 @@ module.exports = {
         restoreConsoleLog();
 
         test.strictEqual(
-            log[0].split(' ').slice(5).join(' '),
+            log[0].split(' ').slice(3).join(' '),
             TestError.MESSAGES[TestError.CODES.USER_ERROR],
             'not binded error message contains placeholder');
 
@@ -228,7 +196,7 @@ module.exports = {
         restoreConsoleLog();
 
         test.strictEqual(
-            log[0].split(' ').slice(5).join(' '),
+            log[0].split(' ').slice(3).join(' '),
             TestError.MESSAGES[TestError.CODES.USER_ERROR].replace('%username%', userName).replace('%time%', time),
             'bind placeholders replacement done');
 
@@ -238,7 +206,7 @@ module.exports = {
         restoreConsoleLog();
 
         test.strictEqual(
-            log[0].split(' ').slice(5).join(' '),
+            log[0].split(' ').slice(3).join(' '),
             TestError.MESSAGES[TestError.CODES.TO_STRING_TEST],
             'placeholder still here');
 
@@ -249,24 +217,22 @@ module.exports = {
         restoreConsoleLog();
 
         test.strictEqual(
-            log[0].split(' ').slice(5).join(' '),
+            log[0].split(' ').slice(3).join(' '),
             userName,
             'placeholder still here');
 
         test.strictEqual(terrorBinded.data.username, userName,
             'binded data available via `data` property');
-
-        test.done();
     },
 
-    "ensureError" : function(test) {
+    "ensureError" : function() {
         var rawError = new Error('test error'),
             terror = new Terror(null, 'test error'),
             ChildError = Terror.create('ChildError', {}),
             childError = new ChildError(null, 'test child terror error'),
             ensuredError,
-            code = 42,
-            zeroCode = 0,
+            code = 'TEST_CODE',
+            zeroCode = '',
             ensuredErrorWithCode,
             ensuredErrorWithZeroCode;
 
@@ -335,7 +301,5 @@ module.exports = {
 
             test.strictEqual(err, ensuredError, 'original ChildError instance is the same object as of ensured error');
         }
-
-        test.done();
     }
 };
