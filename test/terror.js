@@ -301,5 +301,37 @@ module.exports = {
 
             test.strictEqual(err, ensuredError, 'original ChildError instance is the same object as of ensured error');
         }
+    },
+
+    "isTerror" : function() {
+        var ChildError = Terror.create('ChildError', {}),
+            rawError = new Error('test error'),
+            terror = new Terror(null, 'test error'),
+            childTerror = new ChildError(null, 'test child terror error'),
+            ensuredError;
+
+        test.notOk(Terror.isTerror(rawError), 'an instance of Error is not recognized as a Terror instance');
+        test.ok(Terror.isTerror(terror), 'an instance of Terror is recognized');
+        test.ok(Terror.isTerror(childTerror), 'an instance of descendant Terror class is recognized');
+
+        try {
+            throw rawError;
+        } catch (err) {
+            test.notOk(Terror.isTerror(err), 'an instance of catched Error is not recognized as a Terror instance');
+
+            ensuredError = Terror.ensureError(err);
+            test.ok(Terror.isTerror(ensuredError), 'an instance of ensured error is recognized');
+        }
+
+        ensuredError = undefined;
+
+        try {
+            throw terror;
+        } catch (err) {
+            test.ok(Terror.isTerror(err), 'an instance of catched Terror is recognized');
+
+            ensuredError = Terror.ensureError(err);
+            test.ok(Terror.isTerror(ensuredError), 'an instance of ensured error is recognized');
+        }
     }
 };
