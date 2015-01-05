@@ -166,6 +166,19 @@ arr.forEach(function(item) {
 })
 ```
 
+### isTerror(error)
+
+Checks whether the `error` is an instance of Terror class.
+
+Example:
+```javascript
+var err = new Error('average error here');
+Terror.isTerror(err) === false;
+
+var terr = Terror.ensureError(err);
+Terror.isTerror(terr) === true;
+```
+
 ## Methods of prototype
 
 ### log(level)
