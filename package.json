@@ -1,6 +1,6 @@
 {
   "name": "terror",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Base error class which will help you grep logs more effectively",
   "main": "./lib/terror.js",
   "scripts": {
