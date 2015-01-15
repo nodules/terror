@@ -1,4 +1,7 @@
-# Terror [![Build Status](https://secure.travis-ci.org/nodules/terror.png)](http://travis-ci.org/nodules/terror)
+Terror [![NPM version][npm-image]][npm-link] [![Build Status][build-image]][build-link]
+======
+
+[![Development Dependency status][devdeps-image]][devdeps-link]
 
 Base error class which will help you organize errors, generate informative logs and as result grep logs more effectively.
 
@@ -261,3 +264,9 @@ ERROR UNKNOWN_ERROR Terror: Unknown error (TypeError: Object #<Console> has no m
 >>>>>     at ReadStream.onkeypress (readline.js:99:10)
 ```
 
+[npm-image]: https://img.shields.io/npm/v/terror.svg?style=flat
+[npm-link]: https://npmjs.org/package/terror
+[build-image]: https://img.shields.io/travis/nodules/terror.svg?style=flat
+[build-link]: https://travis-ci.org/nodules/terror
+[devdeps-image]: https://img.shields.io/david/dev/nodules/terror.svg?style=flat
+[devdeps-link]: https://david-dm.org/nodules/terror#info=devDependencies
