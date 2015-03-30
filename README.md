@@ -35,6 +35,7 @@ try {
 ## Constructor
 
 ```javascript
+new Terror(code, originalError);
 new Terror(code, message);
 new Terror(code);
 new Terror();
