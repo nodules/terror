@@ -169,6 +169,18 @@ describe('Terror', function () {
             assert.strictEqual(MyError.prototype.constructor, MyError);
         });
 
+        it('should allow error names which is not valid identifiers in the JavaScript', function() {
+            var Entity;
+
+            assert.doesNotThrow(function() {
+                Entity = {
+                    Error: Terror.create('Entity.Error')
+                };
+            });
+
+            assert.equal(Entity.Error.prototype.name, 'Entity.Error');
+        });
+
         it('should properly set static properties', function () {
             MyError = Terror.create('MyError');
 
