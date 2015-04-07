@@ -257,7 +257,7 @@ describe('Terror', function () {
         });
     });
 
-    describe('.extendCodes', function () {
+    describe('.extendCodes()', function () {
         it('should return current context', function () {
             assert.strictEqual(Terror.extendCodes({}), Terror);
 
@@ -358,7 +358,7 @@ describe('Terror', function () {
         Terror.setLogger(defaultLogger);
     });
 
-    describe('.stackTraceLimit()', function () {
+    describe('.stackTraceLimit', function () {
         afterEach(function () {
             Terror.stackTraceLimit = 10;
         });
