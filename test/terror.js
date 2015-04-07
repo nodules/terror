@@ -1,341 +1,603 @@
-var test = require('chai').assert,
-    Terror = require('../lib/Terror'),
-    originalConsoleLog = console.log,
-    log = [];
+/* global describe, it, beforeEach, afterEach, it */
+var sinon = require('sinon');
+var assert = require('chai').assert;
 
-function restoreConsoleLog() {
-    console.log = originalConsoleLog;
-}
+sinon.assert.expose(assert, { prefix: '' });
 
-function catchConsoleLog() {
-    log = [];
+describe('Terror', function () {
+    var Terror = require('../lib/terror');
+    var terror;
+    var error;
+    var data;
+    var MyError;
+    var consoleLog = sinon.spy();
+    var originalConsoleLog = console.log;
 
-    console.log = function(msg) {
-        var _msg = msg.split('\n'),
-            i = 0,
-            line;
-        while (/* jshint boss:true */line = _msg[i++]) {
-            log.push(line);
-        }
-    };
-}
+    beforeEach(function () {
+        console.log = consoleLog;
+        terror = new Terror();
+    });
 
-module.exports = {
-    constructor : function() {
-        var testErrorName = 'TestError',
-            errorMessage = 'Test Error message',
-            TestError = Terror.create(testErrorName),
-            testError = new TestError(TestError.CODES.UNKNOWN_ERROR),
-            testError2 = new TestError(
-                TestError.CODES.UNKNOWN_ERROR,
-                TestError.MESSAGES[TestError.CODES.UNKNOWN_ERROR]),
-            terrorDefaultCode = new TestError(),
-            terrorViaCtor = new TestError(TestError.CODES.UNKNOWN_ERROR, errorMessage);
+    afterEach(function() {
+        console.log = originalConsoleLog;
+    });
 
-        test.ok(testError instanceof TestError, 'inheritance check #1');
-        test.ok(testError instanceof Error, 'inheritance check #2');
-        test.ok(testError instanceof Object, 'inheritance check #3');
+    function checkInstance(code, message, original, data, name) {
+        assert.strictEqual(terror.code, code);
+        assert.strictEqual(terror.message, message);
+        assert.strictEqual(terror.originalError, original);
 
-        test.strictEqual(testError.message, testError2.message, 'constructor call with `code` argument only');
-        test.strictEqual(testError.message, Terror.MESSAGES[Terror.CODES.UNKNOWN_ERROR], 'message by code selection');
-        test.strictEqual(TestError.prototype.name, testErrorName, '`name` prototype property set');
-        test.ok(Object.prototype.hasOwnProperty.call(TestError.prototype,'name'), 'Terror inheritor has own prototype property `name`');
-        test.strictEqual(testError.name, testErrorName, '`name` property available in the instance');
-
-        test.strictEqual(terrorDefaultCode.code, TestError.CODES.UNKNOWN_ERROR, 'use default code, if no one passed to createError');
-        test.strictEqual(terrorViaCtor.message, errorMessage, 'message passed to constructor as string');
-
-        test.strictEqual(typeof testError.stack, 'string', 'call stack available via `stack` property');
-    },
-
-    "createError & extendCodes" : function() {
-        var testCodes = {
-                USER_ERROR : 'User "%username%" leads to error',
-                ABSOLUTE_ERROR : 'Our World Is Broken...'
-            },
-            TestError = Terror.create('TestError').extendCodes(testCodes),
-            TestErrorWithCodes = Terror.create('TestErrorWithCodes', testCodes),
-            errorMessage = 'Test Error message',
-            userName = 'john_doe',
-            originalError = new Error(errorMessage),
-            terrorByError = TestError.createError(null, originalError),
-            terrorWithData = TestError.createError(TestError.CODES.USER_ERROR, { username : userName }),
-            terrorWithMessage = TestError.createError(TestError.CODES.USER_ERROR, errorMessage),
-            terrorWithZeroErrorCode = TestError.createError(TestError.CODES.ABSOLUTE_ERROR);
-
-        test.strictEqual(terrorByError.code, TestError.CODES.UNKNOWN_ERROR, 'use default code, if no one passed to createError');
-        test.strictEqual(terrorByError.originalError, originalError, 'Error instance passed to createError');
-
-        test.strictEqual(terrorWithZeroErrorCode.code, TestError.CODES.ABSOLUTE_ERROR, 'error with zero code doesn\'t use default code');
-
-        test.strictEqual(terrorWithMessage.code, TestError.CODES.USER_ERROR, 'error code passed to createError with custom message');
-
-        // Строка сообщения об ошибке не является оригинальным объектом ошибки!
-        test.equal(terrorWithMessage.originalError, null, 'custom message passed to createError');
-
-        test.notStrictEqual(TestError.CODES, Terror.CODES, 'static field CODE deep copied');
-        test.notStrictEqual(TestError.MESSAGES, Terror.MESSAGES, 'static field MESSAGES deep copied');
-
-        Object.getOwnPropertyNames(Terror.CODES).forEach(function(code) {
-            test.strictEqual(
-                TestError.CODES[code],
-                Terror.CODES[code],
-                ['error code "', code, '" inheritance from ', Terror.prototype.name].join(''));
-            test.strictEqual(
-                TestError.MESSAGES[code],
-                Terror.MESSAGES[code],
-                ['error message "', code, '" : ', code, ' inheritance from ', Terror.prototype.name].join(''));
-        });
-
-        Object.getOwnPropertyNames(testCodes).forEach(function(code) {
-            [TestError, TestErrorWithCodes].forEach(function(toTest) {
-                test.strictEqual(
-                    toTest.MESSAGES[code],
-                    testCodes[code],
-                    ['Terror inheritor "',toTest.prototype.name,'" has it\'s own error message "', code, '" : ', code].join(''));
-            });
-
-        });
-
-        test.strictEqual(
-            terrorWithData.message,
-            TestError.MESSAGES[TestError.CODES.USER_ERROR].replace('%username%', userName),
-            'message data bindings via createError');
-
-    },
-
-    "logError, setLogger, logger and error formatting" : function() {
-        var errorClassName = 'TestError',
-            testCodes = { USER_ERROR : 'User "%username%" leads to error at %time%' },
-            TestError = Terror.create(errorClassName).extendCodes(testCodes),
-            errorMessage = 'Test Error message',
-            //userName = 'john_doe',
-            //time = '12:05',
-            errorLevel = 'panic',
-            originalError = new Error(errorMessage),
-            terrorByError = TestError.createError(null, originalError),
-            //terrorWithData = TestError.createError(TestError.CODES.USER_ERROR, { username : userName, time : time }),
-            terrorWithMessage = TestError.createError(TestError.CODES.USER_ERROR, errorMessage);
-
-        catchConsoleLog();
-        terrorByError.log();
-        restoreConsoleLog();
-
-        test.ok(log.length > 1, 'multiline log');
-
-        test.strictEqual(log[0].split(' ')[0], TestError.DEFAULT_ERROR_LEVEL, 'default error level');
-
-        test.strictEqual(
-            log[1].split(' ')[0],
-            TestError.DEFAULT_ERROR_LEVEL.replace(/./g, '>'),
-            'error level replaced with ">"');
-
-        //test.strictEqual(log[0].split(' ')[2].replace(/:$/g, ''), errorClassName, 'log error class name');
-
-        // Сообщение об ошибке не дублируется!
-        /*test.strictEqual(
-            log[0].split(' ').slice(3).join(' ').replace(/^.*\(Error: (.*)\)$/g, "$1"),
-            errorMessage,
-            'log original error message');*/
-
-        catchConsoleLog();
-        terrorByError.log();
-        restoreConsoleLog();
-
-        test.strictEqual(log.length, 0, 'log error only once');
-
-        catchConsoleLog();
-        terrorWithMessage.log(errorLevel);
-        restoreConsoleLog();
-
-        /*test.strictEqual(
-            log[0].split(' ').slice(3).join(' ').replace(/.*\((.*)\)$/g, "$1"),
-            errorMessage,
-            'append original error message');*/
-        test.strictEqual(
-            log[0].split(' ')[0],
-            errorLevel.toUpperCase(),
-            'custom error level passed to logError');
-        /*test.strictEqual(
-            log[0].split(' ')[1],
-            TestError.CODES.USER_ERROR,
-            'custom error code');*/
-
-        /*catchConsoleLog();
-        terrorWithData.log();
-        restoreConsoleLog();
-
-        test.strictEqual(
-            log[0].split(' ').slice(3).join(' '),
-            TestError.MESSAGES[TestError.CODES.USER_ERROR].replace('%username%', userName).replace('%time%', time),
-            'data binding via createError');*/
-    },
-
-    "bind" : function() {
-        var testCodes = {
-                USER_ERROR : 'User "%username%" leads to error at %time%',
-                TO_STRING_TEST : '%toString%'
-            },
-            TestError = Terror.create('TestError').extendCodes(testCodes),
-            //userName = 'john_doe',
-            //time = '12:04',
-            terrorNotBinded = TestError.createError(TestError.CODES.USER_ERROR)
-            /*terrorBinded = TestError
-                .createError(TestError.CODES.USER_ERROR)
-                .bind({ username : userName, time : time }),
-            terrorProto = TestError.createError(TestError.CODES.TO_STRING_TEST)*/;
-
-        catchConsoleLog();
-        terrorNotBinded.log();
-        restoreConsoleLog();
-
-        /*test.strictEqual(
-            log[0].split(' ').slice(3).join(' '),
-            TestError.MESSAGES[TestError.CODES.USER_ERROR],
-            'not binded error message contains placeholder');*/
-
-        /*catchConsoleLog();
-        terrorBinded.log();
-        restoreConsoleLog();
-
-        test.strictEqual(
-            log[0].split(' ').slice(3).join(' '),
-            TestError.MESSAGES[TestError.CODES.USER_ERROR].replace('%username%', userName).replace('%time%', time),
-            'bind placeholders replacement done');
-
-        terrorProto.bind({});
-        catchConsoleLog();
-        terrorProto.log();
-        restoreConsoleLog();
-
-        test.strictEqual(
-            log[0].split(' ').slice(3).join(' '),
-            TestError.MESSAGES[TestError.CODES.TO_STRING_TEST],
-            'placeholder still here');*/
-
-        // Стек формируется один раз!
-        /*terrorProto._isLogged = false;
-        terrorProto.bind({ toString : userName });
-        catchConsoleLog();
-        terrorProto.log();
-        restoreConsoleLog();
-
-        test.strictEqual(
-            log[0].split(' ').slice(3).join(' '),
-            TestError.MESSAGES[TestError.CODES.TO_STRING_TEST],
-            'placeholder still here');
-
-        test.strictEqual(terrorBinded.data.username, userName,
-            'binded data available via `data` property');*/
-    },
-
-    "ensureError" : function() {
-        var rawError = new Error('test error'),
-            terror = new Terror(null, 'test error'),
-            ChildError = Terror.create('ChildError', {}),
-            childError = new ChildError(null, 'test child terror error'),
-            ensuredError,
-            code = 'TEST_CODE',
-            zeroCode = '',
-            ensuredErrorWithCode,
-            ensuredErrorWithZeroCode;
-
-        try {
-            throw rawError;
-        } catch (err) {
-            ensuredError = Terror.ensureError(err);
-
-            test.notEqual(err, ensuredError, 'ensured error is not the same as raw Error');
-            test.strictEqual(ensuredError.originalError, err, 'ensured error refers to the original raw Error');
-            test.ok(ensuredError instanceof Terror, 'ensured error is an instance of the Terror');
+        if (arguments.length > 3) {
+            assert.deepEqual(terror.data, data);
+        } else {
+            assert.deepEqual(terror.data, {});
         }
 
-        ensuredError = undefined;
-
-        try {
-            throw rawError;
-        } catch (err) {
-            ensuredErrorWithCode = Terror.ensureError(err, code);
-            ensuredErrorWithZeroCode = Terror.ensureError(err, zeroCode);
-
-            test.strictEqual(ensuredErrorWithCode.code, code, 'ensured error code is the same as passed');
-            test.strictEqual(ensuredErrorWithZeroCode.code, zeroCode, 'ensured error zero code is still zero');
-        }
-
-        ensuredError = undefined;
-
-        try {
-            throw terror;
-        } catch (err) {
-            ensuredError = Terror.ensureError(err);
-
-            test.strictEqual(ensuredError, terror, 'original Terror instance is the same object as of ensured error');
-        }
-
-        ensuredError = undefined;
-
-        try {
-            throw rawError;
-        } catch (err) {
-            ensuredError = ChildError.ensureError(err);
-
-            test.ok(ensuredError instanceof Terror, 'ensured as ChildError error is an instance of the Terror');
-            test.ok(ensuredError instanceof ChildError, 'ensured as ChildError error is an instance of the ChildError');
-        }
-
-        ensuredError = undefined;
-
-        try {
-            throw terror;
-        } catch (err) {
-            ensuredError = ChildError.ensureError(err);
-
-            test.notEqual(err, ensuredError, 'ensured as ChildError error is not the same as error of Terror');
-            test.strictEqual(ensuredError.originalError, err, 'ensured as ChildError error refers to the original error of Terror');
-            test.ok(ensuredError instanceof Terror, 'ensured as ChildError error is an instance of the Terror');
-            test.ok(ensuredError instanceof ChildError, 'ensured as ChildError error is an instance of the ChildError');
-        }
-
-        ensuredError = undefined;
-
-        try {
-            throw childError;
-        } catch (err) {
-            ensuredError = ChildError.ensureError(err);
-
-            test.strictEqual(err, ensuredError, 'original ChildError instance is the same object as of ensured error');
-        }
-    },
-
-    "isTerror" : function() {
-        var ChildError = Terror.create('ChildError', {}),
-            rawError = new Error('test error'),
-            terror = new Terror(null, 'test error'),
-            childTerror = new ChildError(null, 'test child terror error'),
-            ensuredError;
-
-        test.notOk(Terror.isTerror(rawError), 'an instance of Error is not recognized as a Terror instance');
-        test.ok(Terror.isTerror(terror), 'an instance of Terror is recognized');
-        test.ok(Terror.isTerror(childTerror), 'an instance of descendant Terror class is recognized');
-
-        try {
-            throw rawError;
-        } catch (err) {
-            test.notOk(Terror.isTerror(err), 'an instance of catched Error is not recognized as a Terror instance');
-
-            ensuredError = Terror.ensureError(err);
-            test.ok(Terror.isTerror(ensuredError), 'an instance of ensured error is recognized');
-        }
-
-        ensuredError = undefined;
-
-        try {
-            throw terror;
-        } catch (err) {
-            test.ok(Terror.isTerror(err), 'an instance of catched Terror is recognized');
-
-            ensuredError = Terror.ensureError(err);
-            test.ok(Terror.isTerror(ensuredError), 'an instance of ensured error is recognized');
+        if (arguments.length === 5) {
+            assert.strictEqual(terror.name, name);
+        } else {
+            assert.strictEqual(terror.name, 'Terror');
         }
     }
-};
+
+    describe('constructor', function() {
+        it('should be exported from module', function () {
+            assert.strictEqual(typeof Terror, 'function');
+        });
+
+        it('should have set default static fields', function() {
+            assert.strictEqual(Terror.DEFAULT_ERROR_LEVEL, 'ERROR');
+            assert.deepEqual(Terror.CODES, { UNKNOWN_ERROR: 'UNKNOWN_ERROR' });
+            assert.deepEqual(Terror.MESSAGES, { UNKNOWN_ERROR: 'Unknown error' });
+        });
+
+        it('should inherits an Error constructor', function () {
+            assert(Terror.prototype instanceof Error);
+            assert.strictEqual(Terror.prototype.constructor, Terror);
+        });
+
+        it('should create instance with correct inheritance', function () {
+            assert(terror instanceof Error);
+            assert(terror instanceof Terror);
+            assert.strictEqual(terror.constructor, Terror);
+        });
+
+        it('should create an instance with passed or default error code', function () {
+            terror = new Terror();
+            checkInstance('UNKNOWN_ERROR', 'Unknown error');
+
+            terror = new Terror(null);
+            checkInstance('UNKNOWN_ERROR', 'Unknown error');
+
+            terror = new Terror('code');
+            checkInstance('code');
+        });
+
+        it('should create an instance with passed message', function () {
+            terror = new Terror('code', 'message');
+            checkInstance('code', 'message');
+
+            terror = new Terror(null, 'message');
+            checkInstance('UNKNOWN_ERROR', 'message');
+        });
+
+        it('should create an instance derived from another error', function () {
+            error = new Error('message');
+            terror = new Terror(null, error);
+
+            checkInstance('UNKNOWN_ERROR', 'Unknown error', error);
+
+            terror = new Terror('code', error);
+            checkInstance('code', undefined, error);
+        });
+
+        it('should correctly capture the stacktrace', function () {
+            var error = new Error().stack.split('\n')[1];
+            var terror = new Terror().stack.split('\n')[1];
+
+            assert.strictEqual(
+                error.substr(0, error.length - 7),
+                terror.substr(0, terror.length - 7));
+        });
+    });
+
+    describe('.createError()', function () {
+        it('should create instance of Terror', function () {
+            terror = Terror.createError();
+
+            assert(terror instanceof Error);
+            assert(terror instanceof Terror);
+            assert.strictEqual(terror.constructor, Terror);
+        });
+
+        it('should create an instance with passed or default error code', function () {
+            terror = new Terror();
+            checkInstance('UNKNOWN_ERROR', 'Unknown error');
+
+            terror = Terror.createError(null);
+            checkInstance('UNKNOWN_ERROR', 'Unknown error');
+
+            terror = Terror.createError('code');
+            checkInstance('code');
+        });
+
+        it('should create an instance with passed message', function () {
+            terror = Terror.createError('code', 'message');
+            checkInstance('code', 'message');
+
+            terror = Terror.createError(null, 'message');
+            checkInstance('UNKNOWN_ERROR', 'message');
+        });
+
+        it('should create an instance derived from another error', function () {
+            error = new Error('message');
+            terror = Terror.createError(null, error);
+
+            checkInstance('UNKNOWN_ERROR', 'Unknown error', error);
+
+            terror = Terror.createError('code', error);
+            checkInstance('code', undefined, error);
+        });
+
+        it('should correctly capture the stacktrace', function () {
+            var error = new Error().stack.split('\n')[1];
+            var terror = Terror.createError().stack.split('\n')[1];
+
+            assert.strictEqual(
+                error.substr(0, error.length - 7),
+                terror.substr(0, terror.length - 7));
+        });
+
+        it('should bind a data to instanace', function () {
+            data = {
+                name: 'value'
+            };
+            terror = Terror.createError(null, data);
+
+            checkInstance('UNKNOWN_ERROR', 'Unknown error', undefined, data);
+            assert.deepEqual(terror.data, data);
+        });
+    });
+
+    describe('.create()', function () {
+        it('should create derivative error class', function () {
+            MyError = Terror.create('MyError');
+
+            assert.isFunction(MyError);
+            assert.strictEqual(MyError.name, 'MyError');
+            assert(MyError.prototype instanceof Terror);
+            assert.strictEqual(MyError.prototype.constructor, MyError);
+        });
+
+        it('should properly set static properties', function () {
+            MyError = Terror.create('MyError');
+
+            assert.strictEqual(MyError.create, Terror.create);
+            assert.strictEqual(MyError.extendCodes, Terror.extendCodes);
+            assert.strictEqual(MyError.setLogger, Terror.setLogger);
+            assert.strictEqual(MyError.createError, Terror.createError);
+            assert.strictEqual(MyError.ensureError, Terror.ensureError);
+            assert.strictEqual(MyError.stackTraceLimit, Terror.stackTraceLimit);
+
+            assert.deepEqual(MyError.CODES, Terror.CODES);
+            assert.notStrictEqual(MyError.CODES, Terror.CODES);
+
+            assert.deepEqual(MyError.MESSAGES, Terror.MESSAGES);
+            assert.notStrictEqual(MyError.MESSAGES, Terror.MESSAGES);
+
+            assert.strictEqual(MyError.DEFAULT_ERROR_LEVEL, Terror.DEFAULT_ERROR_LEVEL);
+        });
+
+        it('should create derived class from derived class with proper inheritance', function () {
+            MyError = Terror.create('MyError');
+
+            var Child = MyError.create('Child');
+
+            terror = new Child();
+
+            assert(terror instanceof Child);
+            assert(terror instanceof MyError);
+
+            checkInstance('UNKNOWN_ERROR', 'Unknown error', undefined, {}, 'Child');
+        });
+
+        it('derived constructor should create instance', function () {
+            MyError = Terror.create('MyError');
+            terror = new MyError();
+
+            assert(terror instanceof MyError);
+            assert(terror instanceof Terror);
+            assert(terror instanceof Error);
+
+            checkInstance('UNKNOWN_ERROR', 'Unknown error', undefined, {}, 'MyError');
+        });
+
+        it('should extend error codes and mesages', function () {
+            MyError = Terror.create('MyError', {
+                CODE: 'Message'
+            });
+
+            assert.deepEqual(MyError.CODES, {
+                UNKNOWN_ERROR: 'UNKNOWN_ERROR',
+                CODE: 'CODE'
+            });
+
+            assert.deepEqual(MyError.MESSAGES, {
+                UNKNOWN_ERROR: 'Unknown error',
+                CODE: 'Message'
+            });
+        });
+    });
+
+    it('.isTerror()', function () {
+        assert.isFalse(Terror.isTerror());
+        assert.isFalse(Terror.isTerror(null));
+        assert.isFalse(Terror.isTerror(123));
+        assert.isFalse(Terror.isTerror('error'));
+        assert.isFalse(Terror.isTerror({}));
+        assert.isFalse(Terror.isTerror(new Error('error')));
+
+        assert(Terror.isTerror(new Terror()));
+        assert(Terror.create('MyError').createError());
+        assert(Terror.isTerror({
+            _isTerror: true
+        }));
+    });
+
+    describe('.extendCodes', function () {
+        it('should return current context', function () {
+            assert.strictEqual(Terror.extendCodes({}), Terror);
+
+            MyError = Terror.create('MyError');
+            assert.strictEqual(MyError.extendCodes({}), MyError);
+        });
+
+        it('should merge error codes and messages', function () {
+            MyError = Terror
+                .create('MyError')
+                .extendCodes({
+                    CODE: 'Message'
+                });
+
+            assert.deepEqual(MyError.CODES, {
+                UNKNOWN_ERROR: 'UNKNOWN_ERROR',
+                CODE: 'CODE'
+            });
+
+            assert.deepEqual(MyError.MESSAGES, {
+                UNKNOWN_ERROR: 'Unknown error',
+                CODE: 'Message'
+            });
+        });
+
+        it('should throw an exception if existing and extension codes overlaps', function () {
+            assert.throws(function () {
+                Terror.extendCodes({
+                    UNKNOWN_ERROR: 'Unknown error'
+                });
+            });
+        });
+    });
+
+    describe('.ensureError()', function () {
+        it('should not create new error if first argument is an instance of the context constructor', function () {
+            terror = new Terror();
+            assert.strictEqual(Terror.ensureError(terror), terror);
+
+            MyError = Terror.create('MyError');
+            terror = new MyError();
+            assert.strictEqual(MyError.ensureError(terror), terror);
+            assert.strictEqual(Terror.ensureError(terror), terror);
+        });
+
+        it('should create new error if first argument is not an error', function () {
+            terror = Terror.ensureError(123);
+            checkInstance('UNKNOWN_ERROR', 'Unknown error');
+
+            terror = Terror.ensureError({});
+            checkInstance('UNKNOWN_ERROR', 'Unknown error');
+
+            terror = Terror.ensureError();
+            checkInstance('UNKNOWN_ERROR', 'Unknown error');
+
+            terror = Terror.ensureError(null);
+            checkInstance('UNKNOWN_ERROR', 'Unknown error');
+        });
+
+        it('should create new error if first argument is not an instance of Terror', function () {
+            error = new Error('error');
+            terror = Terror.ensureError(error);
+            checkInstance('UNKNOWN_ERROR', 'Unknown error', error);
+        });
+
+        it('should create new error with message if first argument is string', function () {
+            terror = Terror.ensureError('message');
+            checkInstance('UNKNOWN_ERROR', 'message');
+        });
+
+        it('should wrap into new error if first argument is not an instance of the context constructor', function () {
+            MyError = Terror.create('MyError');
+
+            error = new Terror();
+            terror = MyError.ensureError(error);
+            checkInstance('UNKNOWN_ERROR', 'Unknown error', error, {}, 'MyError');
+        });
+
+        it('Should set a code of an error', function () {
+            // @todo kaero: mmm... looks like some kind of copy-pasted shit
+            terror = Terror.ensureError('message', 'code');
+            checkInstance('code', 'message');
+
+            error = new Terror();
+            terror = Terror.ensureError(error, 'code');
+            checkInstance('UNKNOWN_ERROR', 'Unknown error');
+        });
+    });
+
+    it('Terror.setLogger()', function () {
+        var defaultLogger = terror.logger;
+        var logger = function () {};
+
+        Terror.setLogger(logger);
+
+        assert.strictEqual(terror.logger, logger);
+
+        Terror.setLogger(defaultLogger);
+    });
+
+    describe('.stackTraceLimit()', function () {
+        afterEach(function () {
+            Terror.stackTraceLimit = 10;
+        });
+
+        it('should equals 10 by default', function () {
+            assert.strictEqual(Terror.stackTraceLimit, 10);
+        });
+
+        it('should affect the stacktrace depth', function () {
+            Terror.stackTraceLimit = 5;
+
+            terror = new Terror();
+
+            assert.strictEqual(terror.stack.split('\n').length, 6);
+        });
+
+        it('should leads to an empty stacktrace if value is 0', function () {
+            Terror.stackTraceLimit = 0;
+
+            terror = new Terror();
+
+            assert.strictEqual((terror.stack || '').split('\n').length, 1);
+        });
+
+        it('may be applied to derived error class', function () {
+            MyError = Terror.create('MyError');
+
+            MyError.stackTraceLimit = 5;
+
+            // base property is not affected
+            assert.strictEqual(Terror.stackTraceLimit, 10);
+            terror = new Terror();
+            assert.strictEqual(terror.stack.split('\n').length, 11);
+
+            terror = new MyError();
+            assert.strictEqual(terror.stack.split('\n').length, 6);
+        });
+
+        it('should be inherited by derivatives', function () {
+            Terror.stackTraceLimit = 5;
+
+            MyError = Terror.create('MyError');
+
+            assert.strictEqual(MyError.stackTraceLimit, 5);
+
+            Terror.stackTraceLimit = 10;
+        });
+    });
+
+    describe('#bind()', function () {
+        it('should returns a context', function () {
+            assert.strictEqual(terror.bind(), terror);
+        });
+
+        it('should copy properties from passed object', function () {
+            data = {
+                name: 'value'
+            };
+
+            terror.bind(data);
+
+            assert.notStrictEqual(terror.data, data);
+            assert.deepEqual(terror.data, data);
+        });
+
+        it('should fulfill placeholders in the error message with values of properties of passed object', function () {
+            terror.setMessage('message %name% ');
+
+            terror.bind({ name: 'value' });
+
+            assert.equal(terror.message, 'message value ');
+        });
+
+        it('should keep placeholders in the message if passed object does not own properties with the same names',
+            function () {
+                terror.setMessage('message %name% ');
+
+                terror.bind();
+                assert.equal(terror.message, 'message %name% ');
+
+                terror.bind(null);
+                assert.equal(terror.message, 'message %name% ');
+
+                terror.bind({ nick: 'doggy' });
+                assert.equal(terror.message, 'message %name% ');
+            });
+    });
+
+    describe('#setMessage()', function () {
+        it('should set error message', function() {
+            terror.setMessage('err0r');
+            assert.equal(terror.message, 'err0r');
+        });
+
+        it('should fulfill placeholders in the new message with previously bound data', function() {
+            terror
+                .bind({
+                    code: 100,
+                    message: 'message',
+                    some: 'bar'
+                })
+                .setMessage('error %code% %message%');
+
+            assert.equal(terror.message, 'error 100 message');
+        });
+
+        // @todo kaero: add test for stacktrace update on message update
+    });
+
+    describe('#logger() [default logger]', function () {
+        it('should call Terror#logMultilineError() by default', function () {
+            terror.logMultilineError = sinon.spy();
+
+            terror.logger('message', 'error');
+
+            assert.calledWith(terror.logMultilineError, 'message', 'error');
+        });
+    });
+
+    describe('#logMultilineError()', function () {
+        var logger = sinon.spy();
+
+        afterEach(function () {
+            logger.reset();
+            consoleLog.reset();
+        });
+
+        it('should use default log level if level is not passed', function () {
+            terror.logMultilineError('message', null, logger);
+            assert.calledWith(logger, Terror.DEFAULT_ERROR_LEVEL + ' message');
+        });
+
+        it('should use passed error level if any', function () {
+            terror.logMultilineError('message', 'debug');
+            assert.calledWith(consoleLog, 'DEBUG message');
+        });
+
+        it('should use console.log by default', function () {
+            terror.logMultilineError('message');
+            assert.called(consoleLog);
+        });
+
+        it('should use passed logger if any', function () {
+            terror.logMultilineError('message', null, logger);
+            assert.calledWith(logger, Terror.DEFAULT_ERROR_LEVEL + ' message');
+        });
+
+        it('should add padding to all rows after the first', function () {
+            var stack = terror.stack.split('\n');
+
+            terror.logMultilineError(terror.stack, 'ERR', function (message) {
+                var padded = message.split('\n');
+                var row;
+
+                assert.equal(padded.length, stack.length);
+
+                for (row = 1; row < padded.length; row++) {
+                    assert.equal(padded[row], '>>> ' + stack[row]);
+                }
+            });
+        });
+    });
+
+    describe('#getFullMessage()', function () {
+        var myError;
+
+        beforeEach(function () {
+            MyError = Terror.create('MyError', {
+                MY_CODE: 'Some message'
+            });
+        });
+
+        it('should returns message including nested errors messages', function () {
+            terror = new Terror(null, 'Parent message');
+            myError = new MyError('MY_CODE', terror);
+
+            assert.equal(myError.getFullMessage(), 'MY_CODE Some message. Parent message.');
+        });
+
+        it('should not include empty message', function () {
+            terror = new Terror();
+            myError = new MyError('MY_CODE', terror).setMessage(null);
+
+            assert.equal(myError.getFullMessage(), 'MY_CODE Unknown error.');
+        });
+
+        it('should format error message', function () {
+            myError = new MyError('MY_CODE').setMessage('My message');
+
+            assert.equal(myError.getFullMessage(), 'MY_CODE My message.');
+        });
+    });
+
+    describe('#getFullStack()', function () {
+        it('should returns error stack including nested errors stack', function() {
+            MyError = Terror.create('MyError');
+            var limit = 3;
+            MyError.stackTraceLimit = limit;
+
+            var stack = new MyError(null, new Terror()).getFullStack().split('\n');
+
+            assert.equal(stack.length, Terror.stackTraceLimit + limit + 4);
+            assert.equal(stack[0], 'UNKNOWN_ERROR MyError: Unknown error');
+            assert.equal(stack[limit + 2], '    UNKNOWN_ERROR Terror: Unknown error');
+        });
+    });
+
+    describe('#log()', function () {
+        var logger;
+
+        beforeEach(function() {
+            logger = sinon.spy();
+        });
+
+        afterEach(function() {
+            Terror.setLogger(consoleLog);
+        });
+
+        it('should returns the context', function () {
+            assert.strictEqual(terror.log(), terror);
+        });
+
+        it('should call instance logger', function () {
+            Terror.setLogger(logger);
+
+            terror.log('error');
+            assert.called(terror.logger);
+        });
+
+        it('should call Terror#logger with full stack and log level', function () {
+            Terror.setLogger(logger);
+
+            terror.log('error');
+            assert.calledWith(terror.logger, terror.getFullStack(), 'error');
+        });
+
+        it('should log single error only once', function () {
+            Terror.setLogger(logger);
+
+            terror.log('error');
+            terror.log('error');
+            assert.calledOnce(terror.logger);
+        });
+
+        it('should not log if logger set to non-function value', function () {
+            var currentLogger = terror.logger;
+
+            currentLogger.reset();
+
+            Terror.setLogger(null);
+            terror.log();
+            assert.notCalled(currentLogger);
+        });
+    });
+});
