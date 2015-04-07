@@ -164,7 +164,7 @@ describe('Terror', function () {
             MyError = Terror.create('MyError');
 
             assert.isFunction(MyError);
-            assert.strictEqual(MyError.name, 'MyError');
+            assert.strictEqual(MyError.prototype.name, 'MyError');
             assert(MyError.prototype instanceof Terror);
             assert.strictEqual(MyError.prototype.constructor, MyError);
         });
