@@ -241,19 +241,20 @@ describe('Terror', function () {
         });
     });
 
-    it('.isTerror()', function () {
-        assert.isFalse(Terror.isTerror());
-        assert.isFalse(Terror.isTerror(null));
-        assert.isFalse(Terror.isTerror(123));
-        assert.isFalse(Terror.isTerror('error'));
-        assert.isFalse(Terror.isTerror({}));
-        assert.isFalse(Terror.isTerror(new Error('error')));
+    describe('.isTerror()', function() {
+        it('should returns false if argument is NOT an instance of Terror', function () {
+            assert.isFalse(Terror.isTerror());
+            assert.isFalse(Terror.isTerror(null));
+            assert.isFalse(Terror.isTerror(123));
+            assert.isFalse(Terror.isTerror('error'));
+            assert.isFalse(Terror.isTerror({}));
+            assert.isFalse(Terror.isTerror(new Error('error')));
+        });
 
-        assert(Terror.isTerror(new Terror()));
-        assert(Terror.create('MyError').createError());
-        assert(Terror.isTerror({
-            _isTerror: true
-        }));
+        it('should returns true if argument IS an instance of Terror', function() {
+            assert(Terror.isTerror(new Terror()));
+            assert(Terror.create('MyError').createError());
+        });
     });
 
     describe('.extendCodes', function () {
