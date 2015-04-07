@@ -347,15 +347,18 @@ describe('Terror', function () {
         });
     });
 
-    it('Terror.setLogger()', function () {
-        var defaultLogger = terror.logger;
-        var logger = function () {};
+    describe('.setLogger()', function() {
+        it('should set value of Terror#logger', function() {
+            var defaultLogger = terror.logger;
+            var logger = function () {};
 
-        Terror.setLogger(logger);
+            Terror.setLogger(logger);
 
-        assert.strictEqual(terror.logger, logger);
+            assert.strictEqual(Terror.prototype.logger, logger);
+            assert.strictEqual(terror.logger, logger);
 
-        Terror.setLogger(defaultLogger);
+            Terror.setLogger(defaultLogger);
+        });
     });
 
     describe('.stackTraceLimit', function () {
