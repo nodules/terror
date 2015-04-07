@@ -2,7 +2,7 @@
     "name" : "terror-benchmark",
     "version" : "1.2.0",
     "dependencies": {
-      "terror" : "git://github.com/nodules/terror.git#1.1.0",
+      "terror" : "1.1.0",
       "benchmark" : "1.0.0"
     },
     "scripts": {
