@@ -1,68 +1,33 @@
 {
-    "requireCurlyBraces": [
-        "if",
-        "else",
-        "for",
-        "while",
-        "do"
-    ],
-    "requireSpaceAfterKeywords": [
-        "if",
-        "else",
-        "for",
-        "while",
-        "do",
-        "switch",
-        "return"
-    ],
-    "disallowLeftStickedOperators": [
-        "?",
-        "+",
-        "-",
-        "/",
-        "*",
-        "=",
-        "==",
-        "===",
-        "!=",
-        "!==",
-        ">",
-        ">=",
-        "<",
-        "<="
-    ],
-    "disallowRightStickedOperators": [
-        "!",
-        "?",
-        "+",
-        "/",
-        "*",
-        ":",
-        "=",
-        "==",
-        "===",
-        "!=",
-        "!==",
-        ">",
-        ">=",
-        "<",
-        "<="
-    ],
-    "requireLeftStickedOperators": [
-        ","
-    ],
-    "disallowKeywords": [
-        "with"
-    ],
-    "disallowMultipleLineBreaks": true,
-    "requireSpacesInsideObjectBrackets": "all",
-    "disallowKeywordsOnNewLine": [
-        "else"
-    ],
-    "validateJSDoc": {
-        "checkParamNames": true,
-        "requireParamTypes": true
-    },
-    "excludeFiles": [
-    ]
+  "preset": "yandex",
+  "disallowSpaceAfterPrefixUnaryOperators": ["++", "--", "+", "-", "~"],
+
+  "disallowMultipleVarDecl": null,
+
+  "requireLineBreakAfterVariableAssignment": true,
+
+  "requireSpacesInAnonymousFunctionExpression": {
+    "beforeOpeningCurlyBrace": true
+  },
+
+  "disallowSpacesInsideParentheses": null,
+
+  "disallowSpacesInsideObjectBrackets": null,
+  "requireSpacesInsideObjectBrackets": "all",
+
+  "disallowSpacesInsideArrayBrackets": null,
+  "requireSpacesInsideArrayBrackets": "all",
+
+  "disallowQuotedKeysInObjects": null,
+
+  "disallowImplicitTypeConversion": ["string"],
+
+  "validateIndentation": null,
+
+  "validateParameterSeparator": ", ",
+
+  "validateJSDoc": {
+    "checkParamNames": true,
+    "requireParamTypes": true
+  }
 }
