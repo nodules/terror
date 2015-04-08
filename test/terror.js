@@ -336,14 +336,11 @@ describe('Terror', function () {
             checkInstance('UNKNOWN_ERROR', 'Unknown error', error, {}, 'MyError');
         });
 
-        it('Should set a code of an error', function () {
-            // @todo kaero: mmm... looks like some kind of copy-pasted shit
-            terror = Terror.ensureError('message', 'code');
-            checkInstance('code', 'message');
-
-            error = new Terror();
-            terror = Terror.ensureError(error, 'code');
-            checkInstance('UNKNOWN_ERROR', 'Unknown error');
+        it('should create new error with proper error code', function() {
+            MyError = Terror.create('MyError', { DOGGY: 'cat' });
+            var error = Terror.createError();
+            terror = MyError.ensureError(error, MyError.CODES.DOGGY);
+            checkInstance('DOGGY', 'cat', error, {}, 'MyError');
         });
     });
 
