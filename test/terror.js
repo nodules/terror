@@ -465,7 +465,12 @@ describe('Terror', function () {
             assert.equal(terror.message, 'error 100 message');
         });
 
-        // @todo kaero: add test for stacktrace update on message update
+        it('should update error message in the first line of the stacktrace', function() {
+            var msg = 'Test Message #956473';
+            terror.setMessage(msg);
+            var stackMsg = terror.stack.split('\n')[0];
+            assert.include(stackMsg, msg);
+        });
     });
 
     describe('#logger() [default logger]', function () {
