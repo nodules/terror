@@ -569,6 +569,18 @@ describe('Terror', function () {
             assert.equal(stack[0], 'UNKNOWN_ERROR MyError: Unknown error');
             assert.equal(stack[limit + 2], '    UNKNOWN_ERROR Terror: Unknown error');
         });
+
+        it('should not prepend messages of errors without code with "undefined"', function() {
+            MyError = Terror.create('MyError');
+            var limit = 3;
+            MyError.stackTraceLimit = limit;
+
+            var stack = new MyError(null, new Error('Something happen')).getFullStack().split('\n');
+
+            assert.equal(stack.length, Terror.stackTraceLimit + limit + 4);
+            assert.equal(stack[0], 'UNKNOWN_ERROR MyError: Unknown error');
+            assert.equal(stack[limit + 2], '    Error: Something happen');
+        });
     });
 
     describe('#log()', function () {
