@@ -4,7 +4,8 @@
   "description": "Base error class which will help you grep logs more effectively",
   "main": "./lib/terror.js",
   "scripts": {
-    "test": "jshint lib test && jscs lib test && mocha test"
+    "test": "jshint lib test && jscs lib test && mocha test",
+    "coverage": "mkdir -p coverage && unit-coverage -s lib/*.js -t test/*.js -r html -o ./coverage/index.html run"
   },
   "repository": {
     "type": "git",
