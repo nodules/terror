@@ -1,10 +1,11 @@
 {
   "name": "terror",
-  "version": "1.1.0",
+  "version": "1.2.0-rc3",
   "description": "Base error class which will help you grep logs more effectively",
   "main": "./lib/terror.js",
   "scripts": {
-    "test": "jshint --config .jshintrc lib test && jscs lib test && mocha -u exports test"
+    "test": "jshint lib test && jscs lib test && mocha test",
+    "coverage": "mkdir -p coverage && unit-coverage -s lib/*.js -t test/*.js -r html -o ./coverage/index.html run"
   },
   "repository": {
     "type": "git",
@@ -20,8 +21,10 @@
   "contributors": [
     "Phillip Kovalev <twilightfeel@gmail.com> (https://github.com/kaero)",
     "Dmitriy Vinokurov <vinokuroff.dm@gmail.com> (https://github.com/vindm)",
-    "Igor Shevchenko <cyberskunk@yandex-team.ru> (https://github.com/cy6erskunk)",
-    "Nikita Ezhkov (https://github.com/nikita-ezhkov)"
+    "Igor Shevchenko (https://github.com/cy6erskunk)",
+    "Nikita Ezhkov (https://github.com/nikita-ezhkov)",
+    "Vladislav Kurkin <b-vladi@cs-console.ru> (https://github.com/B-Vladi)",
+    "Vladimir Varankin <nek.narqo@gmail.com> (https://github.com/narqo)"
   ],
   "licenses": [
     {
@@ -31,9 +34,11 @@
   ],
   "readmeFilename": "README.md",
   "devDependencies": {
-    "chai": "^1.10.0",
-    "jscs": "1.4.x",
+    "chai": "^2.2.0",
+    "jscs": "^1.12.0",
     "jshint": "^2.1.0",
-    "mocha": "^2.0.1"
+    "mocha": "^2.2.1",
+    "sinon": "^1.14.1",
+    "unit-coverage": "^3.4.0"
   }
 }

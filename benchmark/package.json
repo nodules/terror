@@ -1,0 +1,12 @@
+{
+    "name" : "terror-benchmark",
+    "version" : "1.2.0",
+    "dependencies": {
+      "terror" : "1.1.0",
+      "benchmark" : "1.0.0"
+    },
+    "scripts": {
+        "test": "npm install && node start.js"
+    },
+    "private" : true
+}
