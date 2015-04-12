@@ -1,6 +1,6 @@
 {
   "name": "terror",
-  "version": "1.2.0-rc3",
+  "version": "1.2.0",
   "description": "Base error class which will help you grep logs more effectively",
   "main": "./lib/terror.js",
   "scripts": {
@@ -23,6 +23,7 @@
     "Dmitriy Vinokurov <vinokuroff.dm@gmail.com> (https://github.com/vindm)",
     "Igor Shevchenko (https://github.com/cy6erskunk)",
     "Nikita Ezhkov (https://github.com/nikita-ezhkov)",
+    "Konstantin Chernenko (https://github.com/zoobestik)",
     "Vladislav Kurkin <b-vladi@cs-console.ru> (https://github.com/B-Vladi)",
     "Vladimir Varankin <nek.narqo@gmail.com> (https://github.com/narqo)"
   ],
