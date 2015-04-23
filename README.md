@@ -183,6 +183,22 @@ var terr = Terror.ensureError(err);
 Terror.isTerror(terr) === true;
 ```
 
+### is(code, error)
+
+Checks whether the `error` is an instance of the context class and an error code equals the passed one.
+
+Example:
+```javascript
+var MyError = Terror.create('MyError', {
+        XCODE: 'code X',
+        ZCODE: 'code Z'
+    });
+
+MyError.is(MyError.CODES.XCODE, MyError.createError(MyError.CODES.XCODE)); // => true
+MyError.is(MyError.CODES.ZCODE, MyError.createError(MyError.CODES.XCODE)); // => false
+MyError.is(MyError.CODES.XCODE, Terror.createError()); // => false
+```
+
 ## Methods of prototype
 
 ### log(level)
