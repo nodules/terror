@@ -257,6 +257,30 @@ describe('Terror', function () {
         });
     });
 
+    describe('#is()', function() {
+        it('should return `true` if error is an instanceof context error class and its code equals passed code',
+            function() {
+                MyError = Terror.create('MyError', { XCODE: 'code X' });
+
+                var error = MyError.createError(MyError.CODES.XCODE);
+                assert.isTrue(MyError.is(MyError.CODES.XCODE, error));
+            });
+
+        it('should return `false` if error is not an instance of constructor', function() {
+                MyError = Terror.create('MyError');
+
+                var error = Terror.createError();
+                assert.isFalse(MyError.is(MyError.CODES.UNKNOWN_ERROR, error));
+        });
+
+        it('should return `false` if error code and passed code are not equals', function() {
+                MyError = Terror.create('MyError', { XCODE: 'code X' });
+
+                var error = MyError.createError();
+                assert.isFalse(MyError.is(MyError.CODES.XCODE, error));
+        });
+    });
+
     describe('.extendCodes()', function () {
         it('should return current context', function () {
             assert.strictEqual(Terror.extendCodes({}), Terror);
