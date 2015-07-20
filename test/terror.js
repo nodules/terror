@@ -139,6 +139,16 @@ describe('Terror', function () {
             checkInstance('code', undefined, error);
         });
 
+        it('should not create new error if first argument is an instance of the context constructor', function () {
+            terror = new Terror();
+            assert.strictEqual(Terror.createError(terror), terror);
+
+            MyError = Terror.create('MyError');
+            terror = new MyError();
+            assert.strictEqual(MyError.createError(terror), terror);
+            assert.strictEqual(Terror.createError(terror), terror);
+        });
+
         it('should correctly capture the stacktrace', function () {
             var error = new Error().stack.split('\n')[1];
             var terror = Terror.createError().stack.split('\n')[1];
@@ -148,7 +158,7 @@ describe('Terror', function () {
                 terror.substr(0, terror.length - 7));
         });
 
-        it('should bind a data to instanace', function () {
+        it('should bind a data to instance', function () {
             data = {
                 name: 'value'
             };
