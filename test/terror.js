@@ -11,6 +11,7 @@ describe('Terror', function () {
     var data;
     var MyError;
     var consoleLog = sinon.spy();
+    /* eslint-disable no-console */
     var originalConsoleLog = console.log;
 
     beforeEach(function () {
@@ -21,6 +22,7 @@ describe('Terror', function () {
     afterEach(function() {
         console.log = originalConsoleLog;
     });
+    /* eslint-enable no-console */
 
     function checkInstance(code, message, original, data, name) {
         assert.strictEqual(terror.code, code);
@@ -267,17 +269,17 @@ describe('Terror', function () {
             });
 
         it('should return `false` if error is not an instance of constructor', function() {
-                MyError = Terror.create('MyError');
+            MyError = Terror.create('MyError');
 
-                var error = Terror.createError();
-                assert.isFalse(MyError.is(MyError.CODES.UNKNOWN_ERROR, error));
+            var error = Terror.createError();
+            assert.isFalse(MyError.is(MyError.CODES.UNKNOWN_ERROR, error));
         });
 
         it('should return `false` if error code and passed code are not equals', function() {
-                MyError = Terror.create('MyError', { XCODE: 'code X' });
+            MyError = Terror.create('MyError', { XCODE: 'code X' });
 
-                var error = MyError.createError();
-                assert.isFalse(MyError.is(MyError.CODES.XCODE, error));
+            var error = MyError.createError();
+            assert.isFalse(MyError.is(MyError.CODES.XCODE, error));
         });
     });
 
