@@ -1,11 +1,11 @@
 /* global describe, it, beforeEach, afterEach, it */
+var Terror = require('../lib/terror');
 var sinon = require('sinon');
 var assert = require('chai').assert;
 
 sinon.assert.expose(assert, { prefix: '' });
 
 describe('Terror', function () {
-    var Terror = require('../lib/terror');
     var terror;
     var error;
     var data;
