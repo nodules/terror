@@ -4,7 +4,7 @@
   "description": "Base error class which will help you grep logs more effectively",
   "main": "./lib/terror.js",
   "scripts": {
-    "test": "eslint lib test && jscs lib test && mocha test",
+    "test": "eslint lib test && jscs lib test && mocha test --check-leaks",
     "coverage": "mkdir -p coverage && unit-coverage -s lib/*.js -t test/*.js -r html -o ./coverage/index.html run"
   },
   "repository": {
@@ -40,7 +40,7 @@
     "eslint-config-nodules": "^0.1.1",
     "jscs": "^2.6.0",
     "jscs-preset-nodules": "^0.1.0",
-    "mocha": "^2.2.1",
+    "mocha": "^2.4.5",
     "sinon": "^1.14.1",
     "unit-coverage": "^3.4.0"
   }
